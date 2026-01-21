@@ -606,3 +606,214 @@ export interface HeatmapEntry {
         }
     }
 }
+
+// ============================================
+// CURRICULUM-AGNOSTIC SYSTEM TYPES
+// ============================================
+
+// Scoring configuration
+export interface ScoringConfig {
+    type: 'numeric' | 'descriptive' | 'rubric'
+    scale?: { min: number; max: number }
+    kkm?: number
+    letterGrades?: {
+        letter: string
+        minScore: number
+        maxScore: number
+        predikat?: string
+    }[]
+    descriptiveLevels?: {
+        code: string
+        label: string
+        minScore: number
+        maxScore: number
+        color: string
+    }[]
+    defaultLevel?: string
+}
+
+// Component configuration
+export interface ComponentConfig {
+    enabled: boolean
+    weight?: number
+    label: string
+    types?: string[]
+    subComponents?: string[]
+}
+
+// Input field configuration
+export interface InputFieldConfig {
+    key: string
+    label: string
+    type: 'number' | 'text' | 'textarea' | 'select' | 'checkbox' | 'file'
+    min?: number
+    max?: number
+    options?: string[]
+    accept?: string
+    multiple?: boolean
+    required?: boolean
+}
+
+// Full curriculum configuration JSON structure
+export interface CurriculumConfigJson {
+    terms: {
+        competency: string
+        learningTarget: string
+        phase?: string
+        element?: string
+        module?: string
+        coreCompetency?: string
+        basicCompetency?: string
+    }
+    scoring: ScoringConfig
+    components: {
+        formative?: ComponentConfig
+        summative?: ComponentConfig
+        project?: ComponentConfig
+        knowledge?: ComponentConfig
+        skills?: ComponentConfig
+        attitude?: ComponentConfig
+    }
+    inputFields: InputFieldConfig[]
+    reportTemplate: string
+    weightCalculation?: { [key: string]: number }
+    phases?: {
+        [key: string]: { grades: number[]; label: string }
+    }
+}
+
+// Curriculum Configuration
+export interface CurriculumConfig {
+    id: string
+    code: string
+    name: string
+    isActive: boolean
+    config: CurriculumConfigJson
+    createdAt: string
+    updatedAt: string
+    _count?: {
+        academicYears: number
+        competencies: number
+    }
+}
+
+// Academic Year Curriculum Link
+export interface AcademicYearCurriculum {
+    id: string
+    academicYearId: string
+    curriculumId: string
+    gradeLevel?: number
+    academicYear?: AcademicYear
+    curriculum?: CurriculumConfig
+}
+
+// Competency Standard (generic for all curricula)
+export interface CompetencyStandard {
+    id: string
+    curriculumId: string
+    subjectId: string
+    code: string
+    description: string
+    type: string // "CP", "KD", "TP", "COMPETENCY"
+    meta?: Record<string, unknown>
+    createdAt: string
+    updatedAt: string
+    curriculum?: CurriculumConfig
+    subject?: Subject
+}
+
+// Generic Grade (flexible grading)
+export interface GenericGrade {
+    id: string
+    studentId: string
+    competencyId?: string
+    subjectId: string
+    academicYearId: string
+    semester: 'GANJIL' | 'GENAP'
+    assessmentType: string // "FORMATIF", "SUMATIF", "PROJECT", "FINAL"
+
+    // Flexible value storage
+    scoreNumeric?: number
+    scoreLetter?: string
+    scoreDescriptive?: string
+    scoreJson?: Record<string, unknown>
+
+    evidenceLinks: string[]
+    feedback?: string
+
+    assessedAt: string
+    assessedBy?: string
+    createdAt: string
+    updatedAt: string
+
+    student?: Student
+    competency?: CompetencyStandard
+    subject?: Subject
+    academicYear?: AcademicYear
+}
+
+// Generic Grade Input (for form submission)
+export interface GenericGradeInput {
+    id?: string
+    studentId: string
+    competencyId?: string
+    subjectId: string
+    academicYearId: string
+    semester: 'GANJIL' | 'GENAP'
+    assessmentType: string
+    curriculumConfigId?: string
+
+    scoreNumeric?: number
+    scoreLetter?: string
+    scoreDescriptive?: string
+    scoreJson?: Record<string, unknown>
+
+    evidenceLinks?: string[]
+    feedback?: string
+    assessedBy?: string
+}
+
+// Report Template
+export interface ReportTemplate {
+    id: string
+    code: string
+    name: string
+    layoutHtml: string
+    config: {
+        fieldMapping: Record<string, string>
+        paperSize: string
+        orientation: string
+    }
+    isActive: boolean
+    createdAt: string
+    updatedAt: string
+}
+
+// Student Grade Summary
+export interface StudentGradeSummary {
+    studentId: string
+    academicYearId: string
+    semester?: string
+    curriculumConfig?: {
+        id: string
+        code: string
+        name: string
+    }
+    subjects: {
+        subject: Subject
+        grades: GenericGrade[]
+        summary: {
+            averageNumeric?: number
+            levelDistribution?: Record<string, number>
+            predominantLevel?: string
+            byAssessmentType?: Record<string, number>
+        }
+    }[]
+}
+
+// Active Curriculum Response
+export interface ActiveCurriculumResponse {
+    curriculum: CurriculumConfig
+    class: Class
+    source: 'default' | 'grade-specific' | 'academic-year'
+}

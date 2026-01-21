@@ -138,6 +138,116 @@ enum CurriculumType {
   MERDEKA       // Kurikulum Merdeka
 }
 
+// ============================================
+// CURRICULUM-AGNOSTIC SYSTEM
+// ============================================
+
+// Central configuration for each curriculum type
+model CurriculumConfig {
+  id        String  @id @default(cuid())
+  code      String  @unique // "MERDEKA_2024", "K13", "CUSTOM_2025"
+  name      String
+  isActive  Boolean @default(false)
+
+  // Policy Configuration (JSON)
+  // Contains: terms, scoring rules, components, inputFields, reportTemplate
+  config Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  academicYears AcademicYearCurriculum[]
+  competencies  CompetencyStandard[]
+
+  @@map("curriculum_configs")
+}
+
+// Links academic years to curriculum configs per grade level
+model AcademicYearCurriculum {
+  id             String @id @default(cuid())
+  academicYearId String
+  curriculumId   String
+  gradeLevel     Int? // Optional: specific grade (10, 11, 12)
+
+  academicYear AcademicYear     @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  curriculum   CurriculumConfig @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+
+  @@unique([academicYearId, gradeLevel])
+  @@map("academic_year_curricula")
+}
+
+// Generic competency standards usable by any curriculum
+model CompetencyStandard {
+  id           String  @id @default(cuid())
+  curriculumId String
+  subjectId    String
+  code         String // "CP.1.1" or "KD.3.1"
+  description  String  @db.Text
+  type         String // "CP", "KD", "TP", "COMPETENCY"
+  meta         Json? // Curriculum-specific details (Fase, Elemen, etc.)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  curriculum CurriculumConfig @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  subject    Subject          @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  grades     GenericGrade[]
+
+  @@unique([curriculumId, code])
+  @@index([subjectId])
+  @@map("competency_standards")
+}
+
+// Flexible grading supporting any scoring system
+model GenericGrade {
+  id             String   @id @default(cuid())
+  studentId      String
+  competencyId   String? // Optional link to competency
+  subjectId      String
+  academicYearId String
+  semester       Semester
+  assessmentType String // "FORMATIF", "SUMATIF", "PROJECT", "FINAL"
+
+  // Flexible Value Storage
+  scoreNumeric     Float? // For K13 (0-100)
+  scoreLetter      String? // For A, B, C grades
+  scoreDescriptive String? // For Merdeka descriptive ("BSH")
+  scoreJson        Json? // For complex rubric data
+
+  evidenceLinks String[] // URLs to student work
+  feedback      String?  @db.Text
+
+  assessedAt DateTime  @default(now())
+  assessedBy String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  student      Student             @relation("GenericGrades", fields: [studentId], references: [id], onDelete: Cascade)
+  competency   CompetencyStandard? @relation(fields: [competencyId], references: [id])
+  subject      Subject             @relation("GenericGrades", fields: [subjectId], references: [id])
+  academicYear AcademicYear        @relation(fields: [academicYearId], references: [id])
+
+  @@index([studentId, subjectId, academicYearId])
+  @@index([competencyId])
+  @@map("generic_grades")
+}
+
+// Report card templates with field mapping
+model ReportTemplate {
+  id         String  @id @default(cuid())
+  code       String  @unique // "RAPOR_MERDEKA_2024"
+  name       String
+  layoutHtml String  @db.Text // Handlebars template
+  config     Json // Field mapping configuration
+  isActive   Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("report_templates")
+}
+
 // System-wide settings
 model SystemSetting {
   id        String   @id @default(cuid())
@@ -328,6 +438,9 @@ model Student {
   performanceTasks    PerformanceTask[]
   p7Penilaian         P7PenilaianTim[]
   portofolio          PortofolioSiswa[]
+
+  // Curriculum-agnostic relations
+  genericGrades       GenericGrade[] @relation("GenericGrades")
 
   @@map("students")
 }
@@ -571,6 +684,10 @@ model AcademicYear {
   portofolioSiswa PortofolioSiswa[]
   ppdbBatches     PPDBBatch[]
 
+  // Curriculum-agnostic relations
+  curriculumConfigs AcademicYearCurriculum[]
+  genericGrades     GenericGrade[]
+
   @@map("academic_years")
 }
 
@@ -635,6 +752,10 @@ model Subject {
 
   // Kurikulum Merdeka relation
   capaianPembelajaran CapaianPembelajaran[]
+
+  // Curriculum-agnostic relations
+  competencyStandards CompetencyStandard[]
+  genericGrades       GenericGrade[] @relation("GenericGrades")
 
   @@map("subjects")
 }
