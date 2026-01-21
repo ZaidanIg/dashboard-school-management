@@ -1,0 +1,1612 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// AUTHENTICATION (Better Auth)
+// ============================================
+
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  name          String
+  emailVerified Boolean    @default(false)
+  image         String?
+  role          UserRole   @default(STAFF)
+  status        UserStatus @default(ACTIVE)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  sessions   Session[]
+  accounts   Account[]
+  teacher    Teacher?
+  activities ActivityLog[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verifications")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  PRINCIPAL
+  TEACHER
+  STAFF
+  PARENT
+  STUDENT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+// ============================================
+// SCHOOL PROFILE
+// ============================================
+
+model School {
+  id                String       @id @default(cuid())
+  npsn              String       @unique
+  name              String
+  status            SchoolStatus @default(NEGERI)
+  educationType     String
+  accreditation     String?
+  accreditationYear Int?
+  foundedYear       Int?
+  curriculum        String?
+  vision            String?      @db.Text
+  mission           String[]
+  address           String?
+  city              String?
+  province          String?
+  postalCode        String?
+  phone             String?
+  email             String?
+  website           String?
+  latitude          Float?
+  longitude         Float?
+  logo              String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  facilities    Facility[]
+  gallery       GalleryItem[]
+  achievements  Achievement[]
+  organizations StudentOrganization[]
+
+  @@map("schools")
+}
+
+enum SchoolStatus {
+  NEGERI
+  SWASTA
+}
+
+// Curriculum type selection
+enum CurriculumType {
+  K13           // Kurikulum 2013
+  MERDEKA       // Kurikulum Merdeka
+}
+
+// System-wide settings
+model SystemSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
+model Facility {
+  id          String            @id @default(cuid())
+  schoolId    String
+  name        String
+  category    String
+  quantity    Int               @default(1)
+  area        Float?
+  condition   FacilityCondition @default(GOOD)
+  description String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@map("facilities")
+}
+
+enum FacilityCondition {
+  GOOD
+  FAIR
+  POOR
+}
+
+model GalleryItem {
+  id          String    @id @default(cuid())
+  schoolId    String
+  title       String
+  category    String
+  imageUrl    String
+  description String?
+  date        DateTime?
+  createdAt   DateTime  @default(now())
+
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@map("gallery_items")
+}
+
+model Achievement {
+  id          String           @id @default(cuid())
+  schoolId    String
+  title       String
+  category    String
+  level       AchievementLevel
+  year        Int
+  description String?
+  studentId   String?
+  teacherId   String?
+  createdAt   DateTime         @default(now())
+
+  school  School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  student Student? @relation(fields: [studentId], references: [id])
+  teacher Teacher? @relation(fields: [teacherId], references: [id])
+
+  @@map("achievements")
+}
+
+enum AchievementLevel {
+  SEKOLAH
+  KOTA
+  PROVINSI
+  NASIONAL
+  INTERNASIONAL
+}
+
+model StudentOrganization {
+  id        String   @id @default(cuid())
+  schoolId  String
+  name      String
+  type      OrgType
+  period    String
+  advisorId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school  School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  advisor Teacher?   @relation(fields: [advisorId], references: [id])
+  members OrgMember[]
+
+  @@map("student_organizations")
+}
+
+enum OrgType {
+  OSIS
+  MPK
+  EXTRACURRICULAR
+}
+
+model OrgMember {
+  id             String   @id @default(cuid())
+  organizationId String
+  studentId      String
+  position       String
+  createdAt      DateTime @default(now())
+
+  organization StudentOrganization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  student      Student             @relation(fields: [studentId], references: [id])
+
+  @@map("org_members")
+}
+
+// ============================================
+// STUDENTS
+// ============================================
+
+model Student {
+  id             String        @id @default(cuid())
+  nis            String        @unique
+  enrollmentDate DateTime      @default(now())
+  graduationDate DateTime?
+  deletedAt      DateTime?
+
+  // Identity
+  name           String
+  nik            String?       @unique
+  nisn           String?       @unique
+  birthPlace     String?
+  birthDate      DateTime?
+  gender         Gender
+  religion       String?
+  address        String?
+  rt             String?
+  rw             String?
+  village        String?
+  district       String?
+  city           String?
+  province       String?
+  postalCode     String?
+  phone          String?
+  email          String?
+  photo          String?
+  
+  // Academic
+  status         StudentStatus @default(ACTIVE)
+  previousSchool String?
+
+  // Parents
+  fatherName      String?
+  fatherNik       String?
+  fatherJob       String?
+  fatherEducation String?
+  fatherPhone     String?
+  
+  motherName      String?
+  motherNik       String?
+  motherJob       String?
+  motherEducation String?
+  motherPhone     String?
+  
+  guardianName      String?
+  guardianNik       String?
+  guardianJob       String?
+  guardianEducation String?
+  guardianPhone     String?
+  guardianRelation  String?
+  
+  parentAddress     String?
+  parentCity        String?
+  parentProvince    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  classEnrollments  ClassEnrollment[]
+  attendances       StudentAttendance[]
+  grades            Grade[]
+  sppBillings       SPPBilling[]
+  permits           StudentPermit[]
+  extracurriculars  ExtracurricularMember[]
+  achievements      Achievement[]
+  orgMemberships    OrgMember[]
+  submissions       AssignmentSubmission[]
+
+  // Kurikulum Merdeka relations
+  penilaianFormatif   PenilaianFormatif[]
+  penilaianSumatif    PenilaianSumatif[]
+  performanceTasks    PerformanceTask[]
+  p7Penilaian         P7PenilaianTim[]
+  portofolio          PortofolioSiswa[]
+
+  @@map("students")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum StudentStatus {
+  ACTIVE
+  INACTIVE
+  GRADUATED
+  TRANSFERRED
+  DROPPED
+}
+
+model StudentAttendance {
+  id           String           @id @default(cuid())
+  studentId    String
+  date         DateTime         @db.Date
+  status       AttendanceStatus
+  checkInTime  DateTime?
+  checkOutTime DateTime?
+  photoUrl     String?
+  checkInLat   Float?
+  checkInLong  Float?
+  notes        String?
+  createdAt    DateTime         @default(now())
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, date])
+  @@map("student_attendances")
+}
+
+enum AttendanceStatus {
+  PRESENT
+  SICK
+  PERMITTED
+  ABSENT
+  LATE
+}
+
+model StudentPermit {
+  id         String       @id @default(cuid())
+  studentId  String
+  type       PermitType
+  startDate  DateTime
+  endDate    DateTime
+  reason     String
+  document   String?
+  status     PermitStatus @default(PENDING)
+  approvedBy String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("student_permits")
+}
+
+enum PermitType {
+  SICK
+  FAMILY
+  OFFICIAL
+  OTHER
+}
+
+enum PermitStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ============================================
+// TEACHERS & STAFF
+// ============================================
+
+model Teacher {
+  id          String          @id @default(cuid())
+  userId      String?         @unique
+  nip         String?         @unique
+  nuptk       String?         @unique
+  name        String
+  gender      Gender
+  birthPlace  String?
+  birthDate   DateTime?
+  address     String?
+  phone       String?
+  email       String?
+  photo       String?
+  position    TeacherPosition @default(HONORER)
+  status      TeacherStatus   @default(ACTIVE)
+  isCertified Boolean         @default(false)
+  certificationFile String?   // URL to PDF/Image
+  
+  // SOP Data
+  nik           String?   @unique
+  religion      String?
+  maritalStatus String?
+  
+  // Education
+  educationDegree String?
+  university      String?
+  major           String?
+
+  joinDate    DateTime        @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id])
+
+  subjects          TeacherSubject[]
+  teachingSchedules TeachingSchedule[]
+  attendances       TeacherAttendance[]
+  performances      TeacherPerformance[]
+  homerooms         Class[]                 @relation("HomeroomTeacher")
+  achievements      Achievement[]
+  advisedOrgs       StudentOrganization[]
+  advisedExtras     Extracurricular[]
+  permits           TeacherPermit[]
+  assignments       Assignment[]
+
+  // Kurikulum Merdeka relations
+  modulAjar         ModulAjar[]
+  timP7Fasilitator  TimP7[]
+
+  @@map("teachers")
+}
+
+enum TeacherPosition {
+  PNS
+  HONORER
+  P3K
+  STAFF
+}
+
+enum TeacherStatus {
+  ACTIVE
+  INACTIVE
+  RETIRED
+  TRANSFERRED
+}
+
+model TeacherSubject {
+  id        String   @id @default(cuid())
+  teacherId String
+  subjectId String
+  createdAt DateTime @default(now())
+
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, subjectId])
+  @@map("teacher_subjects")
+}
+
+model TeacherAttendance {
+  id           String           @id @default(cuid())
+  teacherId    String
+  date         DateTime         @db.Date
+  status       AttendanceStatus
+  checkInTime  DateTime?
+  checkOutTime DateTime?
+  photoUrl     String?
+  checkInLat   Float?
+  checkInLong  Float?
+  notes        String?
+  createdAt    DateTime         @default(now())
+
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, date])
+  @@map("teacher_attendances")
+}
+
+model TeacherPermit {
+  id         String       @id @default(cuid())
+  teacherId  String
+  type       PermitType
+  startDate  DateTime
+  endDate    DateTime
+  reason     String
+  document   String?
+  status     PermitStatus @default(PENDING)
+  approvedBy String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@map("teacher_permits")
+}
+
+model TeacherPerformance {
+  id                String   @id @default(cuid())
+  teacherId         String
+  academicYearId    String
+  semester          Semester
+  teachingScore     Float?
+  attendanceScore   Float?
+  professionalScore Float?
+  socialScore       Float?
+  overallScore      Float?
+  notes             String?
+  evaluatedBy       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  teacher      Teacher      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id])
+
+  @@unique([teacherId, academicYearId, semester])
+  @@map("teacher_performances")
+}
+
+// ============================================
+// ACADEMIC
+// ============================================
+
+model AcademicYear {
+  id        String   @id @default(cuid())
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  classes        Class[]
+  grades         Grade[]
+  performances   TeacherPerformance[]
+  sppBillings    SPPBilling[]
+  calendarEvents AcademicCalendarEvent[]
+
+  // Kurikulum Merdeka relations
+  modulAjar       ModulAjar[]
+  p7Proyek        P7Proyek[]
+  portofolioSiswa PortofolioSiswa[]
+  ppdbBatches     PPDBBatch[]
+
+  @@map("academic_years")
+}
+
+model Class {
+  id                String    @id @default(cuid())
+  name              String
+  grade             Int
+  major             String?
+  academicYearId    String
+  homeroomTeacherId String?
+  capacity          Int       @default(36)
+  deletedAt         DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  academicYear    AcademicYear @relation(fields: [academicYearId], references: [id])
+  homeroomTeacher Teacher?     @relation("HomeroomTeacher", fields: [homeroomTeacherId], references: [id])
+
+  enrollments ClassEnrollment[]
+  schedules   ClassSchedule[]
+  assignments Assignment[]
+
+  @@unique([name, academicYearId])
+  @@map("classes")
+}
+
+model ClassEnrollment {
+  id         String           @id @default(cuid())
+  studentId  String
+  classId    String
+  enrolledAt DateTime         @default(now())
+  status     EnrollmentStatus @default(ACTIVE)
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, classId])
+  @@map("class_enrollments")
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  TRANSFERRED
+  COMPLETED
+}
+
+model Subject {
+  id           String          @id @default(cuid())
+  code         String          @unique
+  name         String
+  category     SubjectCategory
+  hoursPerWeek Int             @default(2)
+  description  String?
+  deletedAt    DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  teachers  TeacherSubject[]
+  schedules ClassSchedule[]
+  grades    Grade[]
+  assignments Assignment[]
+
+  // Kurikulum Merdeka relation
+  capaianPembelajaran CapaianPembelajaran[]
+
+  @@map("subjects")
+}
+
+enum SubjectCategory {
+  WAJIB
+  PEMINATAN_IPA
+  PEMINATAN_IPS
+  MULOK
+  EKSTRA
+}
+
+model ClassSchedule {
+  id        String   @id @default(cuid())
+  classId   String
+  subjectId String
+  teacherId String?
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  room      String?
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id])
+
+  @@map("class_schedules")
+}
+
+model TeachingSchedule {
+  id        String   @id @default(cuid())
+  teacherId String
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  classId   String?
+  subjectId String?
+  room      String?
+  createdAt DateTime @default(now())
+
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@map("teaching_schedules")
+}
+
+model AcademicCalendarEvent {
+  id             String            @id @default(cuid())
+  academicYearId String
+  title          String
+  description    String?
+  startDate      DateTime
+  endDate        DateTime
+  type           CalendarEventType
+  deletedAt      DateTime?
+  createdAt      DateTime          @default(now())
+
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id])
+
+  @@map("academic_calendar_events")
+}
+
+enum CalendarEventType {
+  HOLIDAY
+  EXAM
+  EVENT
+  MEETING
+  OTHER
+}
+
+// ============================================
+// CURRICULUM
+// ============================================
+
+model Curriculum {
+  id          String   @id @default(cuid())
+  name        String
+  year        Int
+  description String?
+  isActive    Boolean  @default(false)
+  deletedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  modules CurriculumModule[]
+
+  @@map("curriculums")
+}
+
+model CurriculumModule {
+  id           String   @id @default(cuid())
+  curriculumId String
+  subjectCode  String
+  grade        Int
+  semester     Semester
+  title        String
+  description  String?
+  competencies String[]
+  deletedAt    DateTime?
+  createdAt    DateTime @default(now())
+
+  curriculum Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+
+  @@map("curriculum_modules")
+}
+
+enum Semester {
+  GANJIL
+  GENAP
+}
+
+// ============================================
+// GRADING
+// ============================================
+
+model Grade {
+  id             String   @id @default(cuid())
+  studentId      String
+  subjectId      String
+  academicYearId String
+  semester       Semester
+
+  assignment1    Float?
+  assignment2    Float?
+  assignment3    Float?
+  midtermExam    Float?
+  finalExam      Float?
+  practicalScore Float?
+  activityScore  Float?
+
+  finalGrade  Float?
+  letterGrade String?
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student      Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject      Subject      @relation(fields: [subjectId], references: [id])
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id])
+
+  @@unique([studentId, subjectId, academicYearId, semester])
+  @@map("grades")
+}
+
+model P5Project {
+  id             String        @id @default(cuid())
+  title          String
+  theme          String
+  description    String?       @db.Text
+  academicYearId String?
+  startDate      DateTime?
+  endDate        DateTime?
+  status         ProjectStatus @default(PLANNING)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  participants P5Participant[]
+
+  @@map("p5_projects")
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  IN_PROGRESS
+  COMPLETED
+}
+
+model P5Participant {
+  id        String   @id @default(cuid())
+  projectId String
+  studentId String
+  role      String?
+  score     Float?
+  notes     String?
+  createdAt DateTime @default(now())
+
+  project P5Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, studentId])
+  @@map("p5_participants")
+}
+
+// ============================================
+// PPDB (NEW STUDENT ADMISSIONS)
+// ============================================
+
+model PPDBBatch {
+  id          String   @id @default(cuid())
+  name        String   // e.g., "Gelombang 1", "Tahun Ajaran 2024/2025"
+  academicYearId String
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean  @default(false)
+  description String?
+  
+  registrations PPDBRegistration[]
+
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("ppdb_batches")
+}
+
+model PPDBRegistration {
+  id            String   @id @default(cuid())
+  batchId       String
+  registrationNo String  @unique // Generated registration number
+  
+  // Personal Info
+  fullName      String
+  nisn          String?
+  nik           String?
+  gender        Gender
+  birthPlace    String
+  birthDate     DateTime
+  religion      String?
+  
+  // Contact
+  email         String
+  phone         String
+  address       String?
+  city          String?
+  postalCode    String?
+  
+  // Parents
+  fatherName    String?
+  fatherPhone   String?
+  motherName    String?
+  motherPhone   String?
+  
+  // Previous School
+  originSchool   String
+  graduationYear Int
+  
+  // Status
+  status        PPDBStatus @default(PENDING)
+  notes         String?    // Admin notes
+
+  // Documents (URLs)
+  ijazahUrl     String?
+  kkUrl         String?
+  aktaUrl       String?
+  photoUrl      String?
+
+  batch         PPDBBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@map("ppdb_registrations")
+}
+
+enum PPDBStatus {
+  PENDING
+  VERIFIED
+  ACCEPTED
+  REJECTED
+}
+
+// ============================================
+// LMS (ASSIGNMENTS)
+// ============================================
+
+model Assignment {
+  id             String   @id @default(cuid())
+  classId        String
+  subjectId      String
+  teacherId      String
+  title          String
+  description    String?  @db.Text
+  dueDate        DateTime?
+  maxScore       Int      @default(100)
+  attachmentUrl  String?  // Can be JSON array for multiple
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  class     Class     @relation(fields: [classId], references: [id])
+  subject   Subject   @relation(fields: [subjectId], references: [id])
+  teacher   Teacher   @relation(fields: [teacherId], references: [id])
+  submissions AssignmentSubmission[]
+  attachments AssignmentAttachment[]
+
+  @@map("assignments")
+}
+
+model AssignmentSubmission {
+  id           String   @id @default(cuid())
+  assignmentId String
+  studentId    String
+  fileUrl      String?  // The uploaded homework
+  content      String?  // Text answer
+  grade        Float?   // Score given by teacher
+  feedback     String?  // Teacher comment
+  status       SubmissionStatus @default(SUBMITTED)
+  submittedAt  DateTime @default(now())
+  gradedAt     DateTime?
+  late         Boolean   @default(false)
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id])
+  student    Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, studentId])
+  @@map("assignment_submissions")
+
+}
+
+model AssignmentAttachment {
+  id           String           @id @default(cuid())
+  assignmentId String
+  type         AttachmentType
+  url          String
+  filename     String?
+  size         Int?
+  mimeType     String?
+  createdAt    DateTime         @default(now())
+
+  assignment   Assignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  @@map("assignment_attachments")
+}
+
+enum AttachmentType {
+  FILE
+  LINK
+  IMAGE
+  VIDEO
+}
+
+
+
+enum SubmissionStatus {
+  DRAFT
+  SUBMITTED
+  LATE
+  GRADED
+  RETURNED
+}
+
+// ============================================
+// FINANCE
+// ============================================
+
+model FeeType {
+  id          String       @id @default(cuid())
+  name        String
+  amount      Decimal      @db.Decimal(15, 2)
+  frequency   FeeFrequency @default(MONTHLY)
+  description String?
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  billings SPPBilling[]
+
+  @@map("fee_types")
+}
+
+enum FeeFrequency {
+  MONTHLY
+  SEMESTER
+  YEARLY
+  ONCE
+}
+
+model SPPBilling {
+  id             String        @id @default(cuid())
+  studentId      String
+  feeTypeId      String
+  academicYearId String
+  month          Int?
+  year           Int
+  amount         Decimal       @db.Decimal(15, 2)
+  dueDate        DateTime
+  status         BillingStatus @default(PENDING)
+  paidAmount     Decimal?      @db.Decimal(15, 2)
+  paidAt         DateTime?
+  paymentMethod  String?
+  receiptNumber  String?
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  student      Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  feeType      FeeType      @relation(fields: [feeTypeId], references: [id])
+  academicYear AcademicYear @relation(fields: [academicYearId], references: [id])
+
+  @@map("spp_billings")
+}
+
+enum BillingStatus {
+  PENDING
+  PAID
+  OVERDUE
+  PARTIAL
+  CANCELLED
+}
+
+model FinanceTransaction {
+  id              String          @id @default(cuid())
+  type            TransactionType
+  category        String
+  amount          Decimal         @db.Decimal(15, 2)
+  description     String
+  date            DateTime        @default(now())
+  referenceNumber String?
+  attachmentUrl   String?
+  createdBy       String?
+  createdAt       DateTime        @default(now())
+
+  @@map("finance_transactions")
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+// ============================================
+// INFRASTRUCTURE
+// ============================================
+
+model InventoryItem {
+  id               String        @id @default(cuid())
+  code             String        @unique
+  name             String
+  category         String
+  location         String?
+  quantity         Int           @default(1)
+  unit             String        @default("unit")
+  condition        ItemCondition @default(GOOD)
+  acquisitionDate  DateTime?
+  acquisitionPrice Decimal?      @db.Decimal(15, 2)
+  lastCheckDate    DateTime?
+  notes            String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  maintenances MaintenanceRecord[]
+
+  @@map("inventory_items")
+}
+
+enum ItemCondition {
+  GOOD
+  FAIR
+  POOR
+  DAMAGED
+}
+
+model Room {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  type        RoomType
+  capacity    Int?
+  floor       Int?
+  building    String?
+  facilities  String[]
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bookings RoomBooking[]
+
+  @@map("rooms")
+}
+
+enum RoomType {
+  CLASSROOM
+  LAB
+  LIBRARY
+  MEETING
+  SPORTS
+  AUDITORIUM
+  OTHER
+}
+
+model RoomBooking {
+  id          String        @id @default(cuid())
+  roomId      String
+  title       String
+  description String?
+  bookedBy    String
+  date        DateTime      @db.Date
+  startTime   String
+  endTime     String
+  status      BookingStatus @default(PENDING)
+  approvedBy  String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@map("room_bookings")
+}
+
+enum BookingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model MaintenanceRecord {
+  id          String            @id @default(cuid())
+  itemId      String?
+  type        MaintenanceType
+  description String
+  cost        Decimal?          @db.Decimal(15, 2)
+  status      MaintenanceStatus @default(PENDING)
+  reportedBy  String?
+  assignedTo  String?
+  reportedAt  DateTime          @default(now())
+  scheduledAt DateTime?
+  completedAt DateTime?
+  notes       String?
+
+  item InventoryItem? @relation(fields: [itemId], references: [id])
+
+  @@map("maintenance_records")
+}
+
+enum MaintenanceType {
+  REPAIR
+  REPLACEMENT
+  INSPECTION
+  CLEANING
+}
+
+enum MaintenanceStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+// ============================================
+// EXTRACURRICULAR
+// ============================================
+
+model Extracurricular {
+  id          String   @id @default(cuid())
+  name        String
+  category    String
+  description String?
+  schedule    String?
+  location    String?
+  advisorId   String?
+  maxMembers  Int?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  advisor Teacher?                @relation(fields: [advisorId], references: [id])
+  members ExtracurricularMember[]
+
+  @@map("extracurriculars")
+}
+
+model ExtracurricularMember {
+  id                String       @id @default(cuid())
+  extracurricularId String
+  studentId         String
+  role              String?
+  joinedAt          DateTime     @default(now())
+  status            MemberStatus @default(ACTIVE)
+
+  extracurricular Extracurricular @relation(fields: [extracurricularId], references: [id], onDelete: Cascade)
+  student         Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([extracurricularId, studentId])
+  @@map("extracurricular_members")
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+}
+
+// ============================================
+// COMMUNICATION
+// ============================================
+
+model Announcement {
+  id             String    @id @default(cuid())
+  title          String
+  content        String    @db.Text
+  category       String?
+  targetAudience String[]
+  isPinned       Boolean   @default(false)
+  publishedAt    DateTime  @default(now())
+  expiresAt      DateTime?
+  createdBy      String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("announcements")
+}
+
+model Letter {
+  id            String       @id @default(cuid())
+  letterNumber  String       @unique
+  type          LetterType
+  subject       String
+  content       String?      @db.Text
+  sender        String?
+  recipient     String?
+  date          DateTime     @default(now())
+  attachmentUrl String?
+  status        LetterStatus @default(DRAFT)
+  createdBy     String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@map("letters")
+}
+
+enum LetterType {
+  INCOMING
+  OUTGOING
+  INTERNAL
+}
+
+enum LetterStatus {
+  DRAFT
+  SENT
+  RECEIVED
+  ARCHIVED
+}
+
+model WhatsAppMessage {
+  id         String        @id @default(cuid())
+  recipients String[]
+  message    String        @db.Text
+  template   String?
+  sentAt     DateTime?
+  status     MessageStatus @default(PENDING)
+  sentBy     String?
+  createdAt  DateTime      @default(now())
+
+  @@map("whatsapp_messages")
+}
+
+enum MessageStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+// ============================================
+// SETTINGS & AUDIT
+// ============================================
+
+model SystemConfig {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String   @db.Text
+  description String?
+  updatedBy   String?
+  updatedAt   DateTime @updatedAt
+
+  @@map("system_configs")
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  permissions String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("roles")
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  entity    String
+  entityId  String?
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("activity_logs")
+}
+
+model DataBackup {
+  id          String          @id @default(cuid())
+  filename    String
+  size        Int
+  type        BackupType
+  status      BackupJobStatus @default(PENDING)
+  storageUrl  String?
+  createdBy   String?
+  createdAt   DateTime        @default(now())
+  completedAt DateTime?
+
+  @@map("data_backups")
+}
+
+enum BackupType {
+  FULL
+  INCREMENTAL
+  MANUAL
+}
+
+enum BackupJobStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
+// ============================================
+// KURIKULUM MERDEKA P7
+// ============================================
+
+// Fase pembelajaran - sesuai jenjang pendidikan
+enum Fase {
+  A   // PAUD - TK
+  B   // SD Kelas 1-2
+  C   // SD Kelas 3-4
+  D   // SD Kelas 5-6, SMP 7-9
+  E   // SMA Kelas 10
+  F   // SMA Kelas 11-12
+}
+
+// Tingkat pencapaian kompetensi (menggantikan sistem nilai angka)
+enum TingkatPencapaian {
+  BB   // Belum Berkembang
+  MB   // Mulai Berkembang
+  BSH  // Berkembang Sesuai Harapan
+  BSB  // Berkembang Sangat Baik
+}
+
+// Jenis penilaian formatif (harian)
+enum JenisPenilaianFormatif {
+  OBSERVASI
+  KUIS
+  TUGAS
+  DISKUSI
+}
+
+// Jenis penilaian sumatif (ujian)
+enum JenisPenilaianSumatif {
+  STS          // Sumatif Tengah Semester
+  SAS          // Sumatif Akhir Semester
+  AKHIR_TAHUN  // Ujian Akhir Tahun
+}
+
+// Capaian Pembelajaran (CP) - Kompetensi yang harus dicapai per mata pelajaran
+model CapaianPembelajaran {
+  id              String   @id @default(cuid())
+  kodeCP          String   @unique
+  fase            Fase
+  mataPelajaranId String
+  deskripsi       String   @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  mataPelajaran   Subject     @relation(fields: [mataPelajaranId], references: [id])
+  modulAjar       ModulAjar[]
+
+  @@index([fase, mataPelajaranId])
+  @@map("capaian_pembelajaran")
+}
+
+// Modul Ajar - Rencana pembelajaran lengkap sesuai format Kurikulum Merdeka
+model ModulAjar {
+  id              String   @id @default(cuid())
+  cpId            String
+  guruId          String
+  tahunAjaranId   String
+  
+  // === INFORMASI UMUM ===
+  namaModul       String
+  fase            Fase
+  kelas           Int
+  deskripsiUmum   String?   @db.Text
+  targetPesertaDidik String? @db.Text
+  profilPelajarPancasila String[] // Array kode dimensi P7 [D1, D2, ...]
+  kompetensiAwal  String?   @db.Text
+  saranaPrasarana String[]
+  modelPembelajaran String  @default("TATAP_MUKA") // TATAP_MUKA, DARING, CAMPURAN
+  
+  // === CAPAIAN & TUJUAN ===
+  tujuanPembelajaran Json?  // [{ kode: "TP-1", deskripsi: "..." }]
+  alurTujuanPembelajaran String? @db.Text
+  
+  // === RANCANGAN PEMBELAJARAN ===
+  alokasiWaktuJam Int       @default(2)
+  jumlahPertemuan Int       @default(1)
+  pertanyaanPemantik String[]
+  pemahamanBermakna String?  @db.Text
+  kegiatanPembelajaran Json? // [{ pertemuan, durasiMenit, pembuka, inti, penutup }]
+  rencanaDiferensiasi Json?  // { konten, proses, produk }
+  rencanaAsesmen Json?       // { diagnostik, formatif, sumatif }
+  
+  // === LAMPIRAN ===
+  lkpd            Json?     // [{ judul, deskripsi, fileUrl }]
+  bahanBacaan     Json?     // [{ judul, url }]
+  glosarium       Json?     // [{ istilah, definisi }]
+  daftarPustaka   String[]
+  
+  // === META ===
+  status          String    @default("DRAFT") // DRAFT, ACTIVE, ARCHIVED
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  cp               CapaianPembelajaran   @relation(fields: [cpId], references: [id])
+  guru             Teacher               @relation(fields: [guruId], references: [id])
+  tahunAjaran      AcademicYear          @relation(fields: [tahunAjaranId], references: [id])
+  penilaianFormatif PenilaianFormatif[]
+  penilaianSumatif  PenilaianSumatif[]
+  performanceTasks  PerformanceTask[]
+
+  @@index([guruId, tahunAjaranId])
+  @@index([cpId, status])
+  @@map("modul_ajar")
+}
+
+// Penilaian Formatif - Penilaian harian berbasis observasi
+model PenilaianFormatif {
+  id                String                  @id @default(cuid())
+  siswaId           String
+  modulAjarId       String
+  jenis             JenisPenilaianFormatif
+  nilai             String?                 // Opsional, bisa deskriptif
+  tingkatPencapaian TingkatPencapaian
+  catatan           String?                 @db.Text
+  tanggal           DateTime                @default(now())
+  createdAt         DateTime                @default(now())
+
+  siswa     Student   @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+  modulAjar ModulAjar @relation(fields: [modulAjarId], references: [id], onDelete: Cascade)
+
+  @@index([siswaId, modulAjarId])
+  @@map("penilaian_formatif")
+}
+
+// Penilaian Sumatif - Ujian tengah/akhir semester
+model PenilaianSumatif {
+  id                    String                @id @default(cuid())
+  siswaId               String
+  modulAjarId           String
+  jenis                 JenisPenilaianSumatif
+  nilaiTes              Decimal?              @db.Decimal(5, 2)
+  nilaiPerformanceTask  Decimal?              @db.Decimal(5, 2)
+  nilaiAkhir            Decimal?              @db.Decimal(5, 2)
+  tingkatPencapaian     TingkatPencapaian?
+  tanggal               DateTime              @default(now())
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  siswa     Student   @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+  modulAjar ModulAjar @relation(fields: [modulAjarId], references: [id], onDelete: Cascade)
+
+  @@index([siswaId, modulAjarId])
+  @@map("penilaian_sumatif")
+}
+
+// Performance Task - Tugas berbasis proyek/produk
+model PerformanceTask {
+  id            String   @id @default(cuid())
+  siswaId       String
+  modulAjarId   String
+  judulTugas    String
+  rubrikId      String?
+  fileEvidences Json?    // [{ filename, url, uploadedAt }]
+  nilai         Decimal? @db.Decimal(5, 2)
+  komentarGuru  String?  @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  siswa     Student   @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+  modulAjar ModulAjar @relation(fields: [modulAjarId], references: [id], onDelete: Cascade)
+
+  @@map("performance_tasks")
+}
+
+// Dimensi P7 - 6 Dimensi Profil Pelajar Pancasila
+model DimensiP7 {
+  id          String  @id @default(cuid())
+  kode        String  @unique // D1-D6
+  namaDimensi String
+  deskripsi   String? @db.Text
+  elemen      Json    // Array of element/sub-dimension names
+
+  proyek P7Proyek[]
+
+  @@map("dimensi_p7")
+}
+
+// P7 Proyek - Proyek Penguatan Profil Pelajar Pancasila
+model P7Proyek {
+  id              String        @id @default(cuid())
+  dimensiId       String
+  tahunAjaranId   String
+  namaProyek      String
+  tema            String?
+  fase            Fase
+  durasiMinggu    Int
+  tanggalMulai    DateTime?
+  tanggalSelesai  DateTime?
+  status          ProjectStatus @default(PLANNING)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  dimensi     DimensiP7    @relation(fields: [dimensiId], references: [id])
+  tahunAjaran AcademicYear @relation(fields: [tahunAjaranId], references: [id])
+  tim         TimP7[]
+
+  @@map("p7_proyek")
+}
+
+// Tim P7 - Kelompok siswa dalam proyek
+model TimP7 {
+  id                String   @id @default(cuid())
+  proyekId          String
+  guruFasilitatorId String
+  namaTim           String
+  siswaIds          Json     // Array of student IDs
+  milestone         Json?    // [{ name, status, dueDate, evidences }]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  proyek         P7Proyek @relation(fields: [proyekId], references: [id], onDelete: Cascade)
+  guruFasilitator Teacher  @relation(fields: [guruFasilitatorId], references: [id])
+  penilaian      P7PenilaianTim[]
+
+  @@map("tim_p7")
+}
+
+// Penilaian Tim P7 - Evaluasi per siswa dalam tim
+model P7PenilaianTim {
+  id              String   @id @default(cuid())
+  timId           String
+  siswaId         String
+  dimensiScores   Json     // { D1: 4, D2: 3, D3: 4, D4: 3, D5: 4, D6: 3 }
+  nilaiTotal      Decimal  @db.Decimal(5, 2)
+  catatan         String?  @db.Text
+  evaluatedAt     DateTime @default(now())
+
+  tim   TimP7   @relation(fields: [timId], references: [id], onDelete: Cascade)
+  siswa Student @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+
+  @@unique([timId, siswaId])
+  @@map("p7_penilaian_tim")
+}
+
+// Portfolio Siswa - Kumpulan hasil belajar siswa
+model PortofolioSiswa {
+  id            String   @id @default(cuid())
+  siswaId       String
+  tahunAjaranId String
+  dataJson      Json     // Aggregated: { formatif: [], sumatif: [], p7: [], achievements: [] }
+  generatedAt   DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  siswa       Student      @relation(fields: [siswaId], references: [id], onDelete: Cascade)
+  tahunAjaran AcademicYear @relation(fields: [tahunAjaranId], references: [id])
+
+  @@unique([siswaId, tahunAjaranId])
+  @@map("portofolio_siswa")
+}

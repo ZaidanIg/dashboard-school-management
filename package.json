@@ -1,0 +1,11 @@
+{
+  "name": "edumanage",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter dashboard dev",
+    "build": "pnpm --filter dashboard build",
+    "preview": "pnpm --filter dashboard preview",
+    "type-check": "pnpm -r type-check"
+  }
+}
