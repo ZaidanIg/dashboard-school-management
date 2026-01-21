@@ -133,6 +133,7 @@ const adminMenuItems: MenuItem[] = [
             { label: 'Roles & Permission', path: '/settings/roles' },
             { label: 'Backup Data', path: '/settings/backup' },
             { label: 'Konfigurasi Sistem', path: '/settings/config' },
+            { label: 'Konfigurasi Kurikulum', path: '/settings/curriculum' },
         ],
     },
     {

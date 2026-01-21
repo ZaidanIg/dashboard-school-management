@@ -85,6 +85,7 @@ import UserManagement from './pages/settings/UserManagement'
 import RolesPermissions from './pages/settings/RolesPermissions'
 import DataBackup from './pages/settings/DataBackup'
 import SystemConfig from './pages/settings/SystemConfig'
+import CurriculumConfigAdmin from './pages/settings/CurriculumConfigAdmin'
 
 // Student Portal
 import StudentPortalDashboard from './pages/student/Dashboard'
@@ -351,6 +352,7 @@ function App() {
                                 <Route path="settings/roles" element={<RolesPermissions />} />
                                 <Route path="settings/backup" element={<DataBackup />} />
                                 <Route path="settings/config" element={<SystemConfig />} />
+                                <Route path="settings/curriculum" element={<CurriculumConfigAdmin />} />
 
                                 {/* School Profile */}
                                 <Route path="profile/identity" element={<SchoolIdentity />} />
