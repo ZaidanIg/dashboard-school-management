@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Users, Search, CheckCircle, XCircle, Clock, Eye } from 'lucide-react'
+import { api } from '@/lib/api'
 
 interface PPDBRegistration {
     id: string
@@ -32,11 +33,10 @@ export default function PPDBRegistrations() {
 
     const fetchRegistrations = async () => {
         try {
-            let url = 'http://localhost:3001/ppdb/registrations'
-            if (statusFilter) url += `?status=${statusFilter}`
-            const res = await fetch(url)
-            const data = await res.json()
-            setRegistrations(data)
+            const params: Record<string, string> = {}
+            if (statusFilter) params.status = statusFilter
+            const data = await api.get<PPDBRegistration[]>('/ppdb/registrations', params)
+            setRegistrations(Array.isArray(data) ? data : [])
         } catch (error) {
             console.error('Failed to fetch registrations', error)
         } finally {
@@ -46,11 +46,7 @@ export default function PPDBRegistrations() {
 
     const updateStatus = async (id: string, status: string) => {
         try {
-            await fetch(`http://localhost:3001/ppdb/registrations/${id}/status`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status })
-            })
+            await api.put(`/ppdb/registrations/${id}/status`, { status })
             fetchRegistrations()
         } catch (error) {
             console.error('Failed to update status', error)

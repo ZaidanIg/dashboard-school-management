@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Camera, MapPin, CalendarCheck, History, Loader2, X, AlertTriangle, FileText, Plus, Calendar, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
+import { Camera, MapPin, CalendarCheck, History, Loader2, X, FileText, Plus, Calendar } from 'lucide-react'
 import PageHeader from '@/components/common/PageHeader'
 import StatusBadge from '@/components/common/StatusBadge'
 import { useToast } from '@/contexts/ToastContext'
@@ -251,7 +251,7 @@ export default function TeacherAttendance() {
             setLocation(null)
 
             const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' })
-            const res = await api.get<AttendanceRecord[]>(`/api/teachers/me/attendance`, {
+            await api.get<AttendanceRecord[]>(`/api/teachers/me/attendance`, {
                 startDate: today,
                 endDate: today
             })

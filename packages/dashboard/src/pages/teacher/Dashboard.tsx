@@ -20,7 +20,7 @@ export default function TeacherDashboard() {
     const { user } = useAuthContext()
 
     const [todaySchedule, setTodaySchedule] = useState<any[]>([])
-    const [myClasses, setMyClasses] = useState<any[]>([])
+
     const [loading, setLoading] = useState(true)
 
     const [stats, setStats] = useState({
@@ -82,7 +82,6 @@ export default function TeacherDashboard() {
                 })
 
                 const myUniqueClasses = Array.from(uniqueClassesMap.values())
-                setMyClasses(myUniqueClasses)
 
                 // Sum up students from unique classes
                 const uniqueClassIds = new Set()

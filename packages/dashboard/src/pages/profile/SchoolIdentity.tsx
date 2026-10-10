@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { School, MapPin, Phone, Mail, Globe, Calendar, Award, Save, Loader2, Navigation } from 'lucide-react'
+import { School, MapPin, Phone, Mail, Globe, Save, Loader2, Navigation } from 'lucide-react'
 import PageHeader from '@/components/common/PageHeader'
 import { api } from '@/lib/api'
 import { useToast } from '@/contexts/ToastContext'
+import { useSchoolStats } from '@/hooks/useProfile'
 
 interface SchoolData {
     id: string | null
@@ -13,10 +14,14 @@ interface SchoolData {
     website: string
     latitude: number | null
     longitude: number | null
+    npsn?: string
+    accreditation?: string
+    curriculum?: string
 }
 
 export default function SchoolIdentity() {
     const { addToast } = useToast()
+    const { stats, refetch: refetchStats } = useSchoolStats()
     const [school, setSchool] = useState<SchoolData | null>(null)
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
@@ -106,6 +111,7 @@ export default function SchoolIdentity() {
             setSchool(res)
             setFormData(res)
             setEditMode(false)
+            await refetchStats()
             addToast('success', 'Profil sekolah berhasil disimpan')
         } catch (error: any) {
             addToast('error', error.message || 'Gagal menyimpan profil sekolah')
@@ -185,11 +191,16 @@ export default function SchoolIdentity() {
                         )}
                         <div className="flex flex-wrap gap-3">
                             <span className="px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full text-sm font-medium">
-                                Terakreditasi A
+                                {stats?.school?.accreditation ? `Terakreditasi ${stats.school.accreditation}` : 'Terakreditasi A'}
                             </span>
                             <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-sm font-medium">
-                                Kurikulum Merdeka
+                                {stats?.school?.curriculum || 'Kurikulum Merdeka'}
                             </span>
+                            {stats?.school?.npsn && (
+                                <span className="px-3 py-1 bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-gray-300 rounded-full text-sm font-medium">
+                                    NPSN {stats.school.npsn}
+                                </span>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -399,21 +410,21 @@ export default function SchoolIdentity() {
 
             {/* Statistics */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-5 text-white">
-                    <p className="text-3xl font-bold">1,250</p>
-                    <p className="text-blue-100 text-sm">Total Siswa</p>
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-5 text-white shadow-sm">
+                    <p className="text-3xl font-bold">{stats?.totalStudents?.toLocaleString('id-ID') ?? '0'}</p>
+                    <p className="text-blue-100 text-sm">Total Siswa Aktif</p>
                 </div>
-                <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-5 text-white">
-                    <p className="text-3xl font-bold">86</p>
-                    <p className="text-emerald-100 text-sm">Guru & Staff</p>
+                <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-5 text-white shadow-sm">
+                    <p className="text-3xl font-bold">{stats?.totalTeachers?.toLocaleString('id-ID') ?? '0'}</p>
+                    <p className="text-emerald-100 text-sm">Guru & Staff Aktif</p>
                 </div>
-                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-5 text-white">
-                    <p className="text-3xl font-bold">36</p>
-                    <p className="text-purple-100 text-sm">Ruang Kelas</p>
+                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-5 text-white shadow-sm">
+                    <p className="text-3xl font-bold">{stats?.totalClassrooms?.toLocaleString('id-ID') ?? '0'}</p>
+                    <p className="text-purple-100 text-sm">Ruang Kelas / Rombel</p>
                 </div>
-                <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-5 text-white">
-                    <p className="text-3xl font-bold">150+</p>
-                    <p className="text-amber-100 text-sm">Prestasi</p>
+                <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-5 text-white shadow-sm">
+                    <p className="text-3xl font-bold">{stats?.totalAchievements?.toLocaleString('id-ID') ?? '0'}</p>
+                    <p className="text-amber-100 text-sm">Total Prestasi</p>
                 </div>
             </div>
         </div>

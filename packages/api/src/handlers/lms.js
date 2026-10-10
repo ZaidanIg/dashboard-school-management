@@ -158,17 +158,37 @@ export const submitAssignment = async (request, h) => {
     const assignment = await prisma.assignment.findUnique({ where: { id } })
     if (!assignment) return Boom.notFound('Tugas tidak ditemukan')
 
+    // Resolve Student ID
+    let validStudentId = studentId
+    if (studentId) {
+        // If frontend passes an ID, check if it's the User ID. If yes, get the real Student ID
+        const studentByUserId = await prisma.student.findFirst({ where: { email: { not: null } } }) // wait, we need session to be secure
+    }
+
+    const { getSession } = await import('../plugins/auth.js')
+    const session = await getSession(request)
+    if (session && session.user.role === 'STUDENT') {
+        const studentRecord = await prisma.student.findFirst({ where: { email: session.user.email } })
+        if (studentRecord) {
+            validStudentId = studentRecord.id
+        }
+    }
+
+    if (!validStudentId) {
+        return Boom.badRequest('Student ID invalid or Student profile not found')
+    }
+
     // Check Deadline & Tolerance (TODO: Tolerance from SystemConfig)
     const now = new Date()
     const isLate = assignment.dueDate ? now > new Date(assignment.dueDate) : false
 
     const submission = await prisma.assignmentSubmission.upsert({
         where: {
-            assignmentId_studentId: { assignmentId: id, studentId }
+            assignmentId_studentId: { assignmentId: id, studentId: validStudentId }
         },
         create: {
             assignmentId: id,
-            studentId,
+            studentId: validStudentId,
             fileUrl,
             content,
             status: isLate ? 'LATE' : 'SUBMITTED', // Set status LATE if late

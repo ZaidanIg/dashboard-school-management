@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { api } from '@/lib/api'
 import { ClipboardCheck, Plus, Save, Loader2, BookOpen, FileText, FlaskConical } from 'lucide-react'
 
 interface Student {
@@ -155,12 +156,43 @@ export default function AsesmenFormatif() {
     }
 
     const handleSave = async () => {
+        if (!selectedClass || !selectedSubject) {
+            alert('Pilih kelas dan mata pelajaran terlebih dahulu')
+            return
+        }
+
         setSaving(true)
-        // TODO: Implement save to API
-        setTimeout(() => {
-            setSaving(false)
+        try {
+            // Convert to generic grade format
+            const gradesPayload = studentData.flatMap(s => 
+                s.entries.map(entry => ({
+                    studentId: s.studentId,
+                    subjectId: selectedSubject,
+                    academicYearId: 'temp-academic-year', // Should come from context in a real app
+                    semester: 'GANJIL', // Should come from context
+                    assessmentType: 'FORMATIVE',
+                    scoreNumeric: entry.score,
+                    feedback: entry.notes,
+                    scoreJson: { type: entry.type, date: entry.date }
+                }))
+            )
+
+            if (gradesPayload.length === 0) {
+                alert('Tidak ada nilai untuk disimpan')
+                setSaving(false)
+                return
+            }
+
+            await api.post('/api/generic-grades/bulk', {
+                grades: gradesPayload
+            })
             alert('Data berhasil disimpan!')
-        }, 1000)
+        } catch (error) {
+            console.error('Failed to save grades', error)
+            alert('Gagal menyimpan data')
+        } finally {
+            setSaving(false)
+        }
     }
 
     const getPredikat = (score: number) => {

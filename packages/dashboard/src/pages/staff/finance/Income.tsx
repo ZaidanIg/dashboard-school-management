@@ -28,6 +28,7 @@ export default function StaffIncome() {
     const [month, setMonth] = useState(new Date().toISOString().slice(0, 7))
     const [loading, setLoading] = useState(true)
     const [incomes, setIncomes] = useState<IncomeRecord[]>([])
+    const [showForm, setShowForm] = useState(false)
 
     useEffect(() => {
         // Simulated data load
@@ -179,6 +180,60 @@ export default function StaffIncome() {
                                 </tr>
                             </tfoot>
                         </table>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Tambah Pemasukan */}
+            {showForm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full space-y-4 shadow-xl">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-bold text-text-main dark:text-white">Tambah Pemasukan</h3>
+                            <button type="button" onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">✕</button>
+                        </div>
+                        <form onSubmit={(e) => {
+                            e.preventDefault()
+                            const form = e.target as HTMLFormElement
+                            const fd = new FormData(form)
+                            const newRecord: IncomeRecord = {
+                                id: Date.now().toString(),
+                                date: (fd.get('date') as string) || new Date().toISOString().slice(0, 10),
+                                category: (fd.get('category') as string) || 'Lainnya',
+                                description: (fd.get('description') as string) || '',
+                                amount: Number(fd.get('amount')) || 0,
+                                source: (fd.get('source') as string) || ''
+                            }
+                            setIncomes(prev => [newRecord, ...prev])
+                            setShowForm(false)
+                        }} className="space-y-3">
+                            <div>
+                                <label className="text-xs font-medium text-gray-500">Tanggal</label>
+                                <input type="date" name="date" defaultValue={new Date().toISOString().slice(0, 10)} className="w-full px-3 py-2 border border-border-color rounded-lg text-sm bg-slate-50 dark:bg-gray-700" required />
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium text-gray-500">Kategori</label>
+                                <select name="category" className="w-full px-3 py-2 border border-border-color rounded-lg text-sm bg-slate-50 dark:bg-gray-700">
+                                    {INCOME_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium text-gray-500">Keterangan</label>
+                                <input type="text" name="description" placeholder="Contoh: Pembayaran SPP" className="w-full px-3 py-2 border border-border-color rounded-lg text-sm bg-slate-50 dark:bg-gray-700" required />
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium text-gray-500">Jumlah (Rp)</label>
+                                <input type="number" name="amount" placeholder="0" className="w-full px-3 py-2 border border-border-color rounded-lg text-sm bg-slate-50 dark:bg-gray-700" required />
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium text-gray-500">Sumber</label>
+                                <input type="text" name="source" placeholder="Contoh: Wali Murid" className="w-full px-3 py-2 border border-border-color rounded-lg text-sm bg-slate-50 dark:bg-gray-700" required />
+                            </div>
+                            <div className="flex justify-end gap-2 pt-2">
+                                <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 border border-border-color rounded-lg text-sm">Batal</button>
+                                <button type="submit" className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors">Simpan</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

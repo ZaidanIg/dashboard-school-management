@@ -1,5 +1,5 @@
 import React, { useRef } from 'react'
-import { Upload, X, File, Image } from 'lucide-react'
+import { Upload, X, File } from 'lucide-react'
 
 interface FileInputProps {
     label: string

@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Search, Eye, Edit, Trash2, Download } from 'lucide-react'
+import { Plus, Search, Download } from 'lucide-react'
 import PageHeader from '@/components/common/PageHeader'
 import DataTable, { type Column } from '@/components/common/DataTable'
 import StatusBadge from '@/components/common/StatusBadge'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import { useStudents } from '@/hooks/useStudents'
-import type { Student } from '@/types/api'
+import type { Student } from '@/types'
 
 export default function StaffStudents() {
     const [search, setSearch] = useState('')

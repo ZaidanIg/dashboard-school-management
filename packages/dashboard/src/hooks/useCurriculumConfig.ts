@@ -22,8 +22,8 @@ export const useCurriculumConfig = () => {
             const response = await api.get<CurriculumConfig[]>(
                 `${API_BASE}/curriculum-configs${params.toString() ? `?${params}` : ''}`
             )
-            setConfigs(response.data || [])
-            return response.data
+            setConfigs(response || [])
+            return response
         } catch (err) {
             setError('Failed to fetch curriculum configs')
             console.error(err)
@@ -40,7 +40,7 @@ export const useCurriculumConfig = () => {
             const response = await api.get<CurriculumConfig>(
                 `${API_BASE}/curriculum-configs/${idOrCode}`
             )
-            return response.data
+            return response
         } catch (err) {
             setError('Failed to fetch curriculum config')
             console.error(err)
@@ -57,7 +57,7 @@ export const useCurriculumConfig = () => {
             const response = await api.get<CurriculumConfig[]>(
                 `${API_BASE}/curriculum-configs?isActive=true`
             )
-            return response.data?.[0] || null
+            return response?.[0] || null
         } catch (err) {
             setError('Failed to fetch active curriculum config')
             console.error(err)
@@ -74,7 +74,7 @@ export const useCurriculumConfig = () => {
             const response = await api.get<ActiveCurriculumResponse>(
                 `${API_BASE}/curriculum-configs/class/${classId}`
             )
-            return response.data
+            return response
         } catch (err) {
             setError('Failed to fetch curriculum config for class')
             console.error(err)
@@ -93,7 +93,7 @@ export const useCurriculumConfig = () => {
                 data
             )
             await fetchConfigs()
-            return response.data
+            return response
         } catch (err) {
             setError('Failed to create curriculum config')
             console.error(err)
@@ -112,7 +112,7 @@ export const useCurriculumConfig = () => {
                 data
             )
             await fetchConfigs()
-            return response.data
+            return response
         } catch (err) {
             setError('Failed to update curriculum config')
             console.error(err)
@@ -130,7 +130,7 @@ export const useCurriculumConfig = () => {
                 `${API_BASE}/curriculum-configs/${id}/activate`
             )
             await fetchConfigs()
-            return response.data
+            return response
         } catch (err) {
             setError('Failed to set active curriculum')
             console.error(err)
@@ -152,7 +152,7 @@ export const useCurriculumConfig = () => {
                 `${API_BASE}/curriculum-configs/link-academic-year`,
                 { curriculumId, academicYearId, gradeLevel }
             )
-            return response.data
+            return response
         } catch (err) {
             setError('Failed to link curriculum to academic year')
             console.error(err)
@@ -199,8 +199,8 @@ export const useReportTemplates = () => {
             const response = await api.get<ReportTemplate[]>(
                 `${API_BASE}/report-templates${params.toString() ? `?${params}` : ''}`
             )
-            setTemplates(response.data || [])
-            return response.data
+            setTemplates(response || [])
+            return response
         } catch (err) {
             setError('Failed to fetch report templates')
             console.error(err)
@@ -217,7 +217,7 @@ export const useReportTemplates = () => {
             const response = await api.get<ReportTemplate>(
                 `${API_BASE}/report-templates/${code}`
             )
-            return response.data
+            return response
         } catch (err) {
             setError('Failed to fetch report template')
             console.error(err)

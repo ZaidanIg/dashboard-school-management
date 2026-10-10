@@ -4,6 +4,7 @@ import {
     Save, Download, Upload, Plus, Trash2, Loader2,
     AlertTriangle, CheckCircle, ChevronRight, FileSpreadsheet
 } from 'lucide-react'
+import { api } from '@/lib/api'
 
 interface Class {
     id: string
@@ -96,9 +97,8 @@ export default function Penilaian() {
 
     const fetchClasses = async () => {
         try {
-            const res = await fetch('http://localhost:3001/api/academic/classes')
-            const response = await res.json()
-            setClasses(response.data || response)
+            const data = await api.get<any[]>('/api/academic/classes')
+            setClasses(Array.isArray(data) ? data : (data as any)?.data || [])
         } catch (error) {
             console.error('Failed to fetch classes', error)
         }
@@ -106,9 +106,8 @@ export default function Penilaian() {
 
     const fetchSubjects = async () => {
         try {
-            const res = await fetch('http://localhost:3001/api/academic/subjects')
-            const response = await res.json()
-            setSubjects(response.data || response)
+            const data = await api.get<any[]>('/api/academic/subjects')
+            setSubjects(Array.isArray(data) ? data : (data as any)?.data || [])
         } catch (error) {
             console.error('Failed to fetch subjects', error)
         }
@@ -116,10 +115,9 @@ export default function Penilaian() {
 
     const fetchTeachers = async () => {
         try {
-            const res = await fetch('http://localhost:3001/api/teachers')
-            const response = await res.json()
-            const data = response.data || response
-            if (Array.isArray(data)) setTeachers(data)
+            const data = await api.get<any[]>('/api/teachers')
+            const list = Array.isArray(data) ? data : (data as any)?.data || []
+            if (Array.isArray(list)) setTeachers(list)
         } catch (error) {
             console.error('Failed to fetch teachers', error)
         }
@@ -129,9 +127,8 @@ export default function Penilaian() {
         if (!selectedClass) return
         setLoading(true)
         try {
-            const res = await fetch(`http://localhost:3001/api/students?classId=${selectedClass}`)
-            const response = await res.json()
-            const data = response.data || response
+            const res = await api.get<any>('/api/students', { classId: selectedClass })
+            const data = Array.isArray(res) ? res : res?.data || []
             if (Array.isArray(data)) {
                 setStudents(data.map((s: Student) => ({
                     studentId: s.id,
@@ -331,11 +328,84 @@ export default function Penilaian() {
     }
 
     const handleSave = async () => {
+        if (!selectedSubject || !selectedClass) {
+            alert('Pilih kelas dan mata pelajaran terlebih dahulu!')
+            return
+        }
+
         setSaving(true)
-        setTimeout(() => {
+        try {
+            const payloadScores: any[] = []
+
+            students.forEach(student => {
+                // Formative TP scores
+                lingkupMateri.forEach(lm => {
+                    ;(['tp1', 'tp2', 'tp3'] as const).forEach(tp => {
+                        const score = student.scores[`${lm.id}-${tp}`]
+                        if (score !== null && score !== undefined) {
+                            payloadScores.push({
+                                studentId: student.studentId,
+                                studentName: student.name,
+                                subjectId: selectedSubject,
+                                classId: selectedClass,
+                                type: 'FORMATIF',
+                                componentKey: `${lm.name}_${tp.toUpperCase()}`,
+                                score: Number(score)
+                            })
+                        }
+                    })
+                })
+
+                // Summative PAS scores
+                if (student.nonTest !== null && student.nonTest !== undefined) {
+                    payloadScores.push({
+                        studentId: student.studentId,
+                        studentName: student.name,
+                        subjectId: selectedSubject,
+                        classId: selectedClass,
+                        type: 'SUMATIF',
+                        componentKey: 'NON_TEST',
+                        score: Number(student.nonTest)
+                    })
+                }
+
+                if (student.test !== null && student.test !== undefined) {
+                    payloadScores.push({
+                        studentId: student.studentId,
+                        studentName: student.name,
+                        subjectId: selectedSubject,
+                        classId: selectedClass,
+                        type: 'SUMATIF',
+                        componentKey: 'TEST',
+                        score: Number(student.test)
+                    })
+                }
+
+                // Final Score
+                if (student.nrp > 0) {
+                    payloadScores.push({
+                        studentId: student.studentId,
+                        studentName: student.name,
+                        subjectId: selectedSubject,
+                        classId: selectedClass,
+                        type: 'FINAL',
+                        componentKey: 'NRP',
+                        score: Number(student.nrp)
+                    })
+                }
+            })
+
+            if (payloadScores.length > 0) {
+                await api.post('/api/generic-grades/bulk', { scores: payloadScores })
+            }
+
+            alert('Data nilai berhasil disimpan ke database!')
+        } catch (error) {
+            console.error('Failed to save grades', error)
+            alert('Gagal menyimpan nilai ke database. Silakan coba lagi.')
+        } finally {
             setSaving(false)
-            alert('Data berhasil disimpan!')
-        }, 1000)
+        }
     }
 
     const canProceed = () => {

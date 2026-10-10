@@ -117,7 +117,7 @@ class DapodikService {
 
     constructor() {
         // In production, these would be loaded from environment
-        console.log('DapodikService initialized')
+        console.log(`DapodikService initialized with baseUrl=${this._baseUrl}, npsn=${this._npsn}`)
     }
 
     // Authenticate with Dapodik
@@ -128,6 +128,7 @@ class DapodikService {
 
         // Mock authentication success
         this._token = 'mock-dapodik-token-' + Date.now()
+        console.log(`Authenticated with token: ${this._token}`)
         return true
     }
 

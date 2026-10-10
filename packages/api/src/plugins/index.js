@@ -13,7 +13,7 @@ export const registerPlugins = async (server) => {
     // Swagger documentation
     const swaggerOptions = {
         info: {
-            title: 'Artefact API',
+            title: 'EduManage API',
             version: '1.0.0',
             description: 'School Management System API'
         },

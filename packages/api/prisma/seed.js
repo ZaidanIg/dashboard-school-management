@@ -104,7 +104,8 @@ async function main() {
                     body: {
                         email: userData.email,
                         password: 'password123',
-                        name: userData.name
+                        name: userData.name,
+                        role: userData.role
                     }
                 })
                 userId = res.user.id
@@ -118,7 +119,8 @@ async function main() {
                     body: {
                         email: userData.email,
                         password: 'password123',
-                        name: userData.name
+                        name: userData.name,
+                        role: userData.role
                     }
                 })
                 userId = res.user.id

@@ -25,6 +25,18 @@ export const infrastructureRoutes = [
         handler: handlers.createInventoryItem,
         options: { tags: ['api', 'infrastructure'], description: 'Create inventory item' }
     },
+    {
+        method: 'PUT',
+        path: '/api/infrastructure/inventory/{id}',
+        handler: handlers.updateInventoryItem,
+        options: { tags: ['api', 'infrastructure'], description: 'Update inventory item' }
+    },
+    {
+        method: 'DELETE',
+        path: '/api/infrastructure/inventory/{id}',
+        handler: handlers.deleteInventoryItem,
+        options: { tags: ['api', 'infrastructure'], description: 'Delete inventory item' }
+    },
     // Rooms
     {
         method: 'GET',

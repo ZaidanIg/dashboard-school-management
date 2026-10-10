@@ -7,6 +7,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner'
 import ErrorState from '@/components/common/ErrorState'
 import { useAssignments } from '@/hooks/useLMS'
 import { useClasses } from '@/hooks/useClasses'
+import { useSubjects } from '@/hooks/useSubjects'
 import AssignmentFormModal from '@/components/academic/AssignmentFormModal'
 
 export default function AssignmentList() {
@@ -15,9 +16,8 @@ export default function AssignmentList() {
     const [subjectFilter, setSubjectFilter] = useState('')
     const [showCreateModal, setShowCreateModal] = useState(false)
 
-    // TODO: Subject List? Not implemented yet generically in hooks maybe?
-    // useClasses provides classes.
     const { classes } = useClasses()
+    const { subjects } = useSubjects()
     const { assignments, loading, error, refetch } = useAssignments({
         classId: classFilter || undefined,
         subjectId: subjectFilter || undefined
@@ -62,7 +62,12 @@ export default function AssignmentList() {
                         onChange: setClassFilter,
                         options: classes.map(c => ({ label: c.name, value: c.id }))
                     },
-                    // Subject filter placeholder
+                    {
+                        label: 'Mata Pelajaran',
+                        value: subjectFilter,
+                        onChange: setSubjectFilter,
+                        options: subjects.map(s => ({ label: s.name, value: s.id }))
+                    }
                 ]}
                 onExport={() => { }}
             />

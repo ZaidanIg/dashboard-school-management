@@ -270,7 +270,7 @@ export default function StudentAttendance() {
             // Refresh history
             // FIX: Use localized date for Jakarta (WIB) to match server logic
             const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' })
-            const res = await api.get<AttendanceRecord[]>(`/api/students/me/attendance`, {
+            await api.get<AttendanceRecord[]>(`/api/students/me/attendance`, {
                 startDate: today,
                 endDate: today
             })

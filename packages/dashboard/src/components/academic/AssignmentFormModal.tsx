@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { X, Upload, Link as LinkIcon, FileText, Image as ImageIcon, Trash2, Plus, Loader2 } from 'lucide-react'
+import { X, Upload, Link as LinkIcon, FileText, Image as ImageIcon, Trash2, Loader2 } from 'lucide-react'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 

@@ -29,6 +29,34 @@ export const settingsRoutes = [
             validate: { params: idParam }
         }
     },
+    {
+        method: 'POST',
+        path: '/api/settings/users',
+        handler: handlers.createUser,
+        options: {
+            tags: ['api', 'settings'],
+            description: 'Create user',
+            validate: {
+                payload: Joi.object({
+                    name: Joi.string().required(),
+                    email: Joi.string().email().required(),
+                    password: Joi.string().min(6).required(),
+                    role: Joi.string().valid('SUPER_ADMIN', 'PRINCIPAL', 'TEACHER', 'STAFF', 'PARENT', 'STUDENT').default('STAFF'),
+                    status: Joi.string().valid('ACTIVE', 'INACTIVE').default('ACTIVE')
+                })
+            }
+        }
+    },
+    {
+        method: 'DELETE',
+        path: '/api/settings/users/{id}',
+        handler: handlers.deleteUser,
+        options: {
+            tags: ['api', 'settings'],
+            description: 'Delete user',
+            validate: { params: idParam }
+        }
+    },
     // Roles
     {
         method: 'GET',
@@ -41,6 +69,18 @@ export const settingsRoutes = [
         path: '/api/settings/roles',
         handler: handlers.createRole,
         options: { tags: ['api', 'settings'], description: 'Create role' }
+    },
+    {
+        method: 'PUT',
+        path: '/api/settings/roles/{id}',
+        handler: handlers.updateRole,
+        options: { tags: ['api', 'settings'], description: 'Update role' }
+    },
+    {
+        method: 'DELETE',
+        path: '/api/settings/roles/{id}',
+        handler: handlers.deleteRole,
+        options: { tags: ['api', 'settings'], description: 'Delete role' }
     },
     // Config
     {
@@ -84,6 +124,24 @@ export const settingsRoutes = [
         path: '/api/settings/backups',
         handler: handlers.createBackup,
         options: { tags: ['api', 'settings'], description: 'Trigger backup' }
+    },
+    {
+        method: 'GET',
+        path: '/api/settings/backups/{id}/download',
+        handler: handlers.downloadBackup,
+        options: { tags: ['api', 'settings'], description: 'Download backup file' }
+    },
+    {
+        method: 'DELETE',
+        path: '/api/settings/backups/{id}',
+        handler: handlers.deleteBackup,
+        options: { tags: ['api', 'settings'], description: 'Delete backup' }
+    },
+    {
+        method: 'POST',
+        path: '/api/settings/backups/restore',
+        handler: handlers.restoreBackup,
+        options: { tags: ['api', 'settings'], description: 'Restore system data from backup' }
     },
     // Me
     {

@@ -58,10 +58,12 @@ export function useCapaianPembelajaran(fase?: Fase, mataPelajaranId?: string) {
 
     return {
         cpList: data,
-        loading,
-        error,
         refetch,
-        ...mutations
+        create: mutations.create,
+        update: mutations.update,
+        remove: mutations.remove,
+        loading: loading || mutations.loading,
+        error: error || mutations.error
     }
 }
 
@@ -153,10 +155,12 @@ export function useModulAjar(cpId?: string, guruId?: string, tahunAjaranId?: str
 
     return {
         modulAjarList: data,
-        loading,
-        error,
         refetch,
-        ...mutations
+        create: mutations.create,
+        update: mutations.update,
+        remove: mutations.remove,
+        loading: loading || mutations.loading,
+        error: error || mutations.error
     }
 }
 
@@ -284,10 +288,12 @@ export function usePerformanceTasks(siswaId?: string, modulAjarId?: string) {
 
     return {
         performanceTasks: data,
-        loading,
-        error,
         refetch,
-        ...mutations
+        create: mutations.create,
+        update: mutations.update,
+        remove: mutations.remove,
+        loading: loading || mutations.loading,
+        error: error || mutations.error
     }
 }
 
@@ -364,10 +370,12 @@ export function useP7Proyek(tahunAjaranId?: string, fase?: Fase, status?: Status
 
     return {
         p7ProyekList: data,
-        loading,
-        error,
         refetch,
-        ...mutations
+        create: mutations.create,
+        update: mutations.update,
+        remove: mutations.remove,
+        loading: loading || mutations.loading,
+        error: error || mutations.error
     }
 }
 

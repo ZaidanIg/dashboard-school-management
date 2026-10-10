@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react'
-import { Plus, FileText, BookOpen, Save, ChevronLeft, ChevronRight, Edit2, Trash2, Eye, X } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Plus, FileText, BookOpen, Save, ChevronLeft, ChevronRight, Edit2, Trash2, X } from 'lucide-react'
 import PageHeader from '@/components/common/PageHeader'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import StatusBadge from '@/components/common/StatusBadge'

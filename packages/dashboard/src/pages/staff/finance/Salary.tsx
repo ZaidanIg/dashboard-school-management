@@ -5,7 +5,7 @@ import StatusBadge from '@/components/common/StatusBadge'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import StatsSummary from '@/components/common/StatsSummary'
 import { useTeachers } from '@/hooks/useTeachers'
-import type { Teacher } from '@/types/api'
+import type { Teacher } from '@/types'
 
 // Salary calculation constants
 const SALARY_RATES = {
@@ -25,7 +25,7 @@ interface TeacherSalary extends Teacher {
 
 export default function StaffSalary() {
     const [search, setSearch] = useState('')
-    const [page, setPage] = useState(1)
+    const page = 1
     const [positionFilter, setPositionFilter] = useState('')
     const [month, setMonth] = useState(new Date().toISOString().slice(0, 7))
 

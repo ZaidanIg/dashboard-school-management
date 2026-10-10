@@ -27,7 +27,7 @@ export default function AssignmentDetail() {
     const [grading, setGrading] = useState(false)
 
     // Derived state for Student
-    const mySubmission = assignment?.submissions?.find(s => s.studentId === user?.id) // Assuming user.id is studentId? Need map if not.
+    const mySubmission = assignment?.submissions?.find(s => s.student?.email === user?.email)
 
     const handleStudentSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -35,7 +35,7 @@ export default function AssignmentDetail() {
         setSubmitting(true)
         try {
             await submitAssignment(id, {
-                studentId: user.id, // TODO: verify if user.id matches student.id logic
+                studentId: user.id, // Backend resolves actual studentId from session via email
                 fileUrl: submissionFile,
                 content: submissionContent
             })

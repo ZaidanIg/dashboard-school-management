@@ -6,3 +6,4 @@ build/
 coverage/
 .vscode/
 client_secret_*.json
+packages/api/uploads/

@@ -27,6 +27,18 @@ export const communicationRoutes = [
         handler: handlers.createAnnouncement,
         options: { tags: ['api', 'communication'], description: 'Create announcement' }
     },
+    {
+        method: 'PUT',
+        path: '/api/communication/announcements/{id}',
+        handler: handlers.updateAnnouncement,
+        options: { tags: ['api', 'communication'], description: 'Update announcement' }
+    },
+    {
+        method: 'DELETE',
+        path: '/api/communication/announcements/{id}',
+        handler: handlers.deleteAnnouncement,
+        options: { tags: ['api', 'communication'], description: 'Delete announcement' }
+    },
     // Letters
     {
         method: 'GET',

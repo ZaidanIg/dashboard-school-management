@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Search, Bell, ChevronDown, Menu, LogOut, User, Settings, Users, GraduationCap, X, Loader2 } from 'lucide-react'
+import { useNavigate, Link } from 'react-router-dom'
+import { Search, Bell, ChevronDown, Menu, LogOut, User, Settings, Users, GraduationCap, X, Loader2, Globe, ExternalLink } from 'lucide-react'
 import { useAuthContext } from '@/contexts/AuthContext'
 
 interface HeaderProps {
@@ -226,6 +226,19 @@ export default function Header({ onMenuClick }: HeaderProps) {
                     <ChevronDown size={18} />
                 </button>
 
+                {/* Landing Page Link */}
+                <Link
+                    to="/home"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border-color dark:border-gray-600 hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors text-text-secondary hover:text-primary dark:text-gray-300 dark:hover:text-white text-sm font-medium"
+                    title="Buka Landing Page"
+                >
+                    <Globe size={16} />
+                    <span>Landing Page</span>
+                    <ExternalLink size={12} className="opacity-70" />
+                </Link>
+
                 {/* User Menu */}
                 <div className="relative">
                     <button
@@ -254,6 +267,19 @@ export default function Header({ onMenuClick }: HeaderProps) {
                                 onClick={() => setShowUserMenu(false)}
                             />
                             <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-border-color dark:border-gray-700 py-1 z-50">
+                                <a
+                                    href="/home"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={() => setShowUserMenu(false)}
+                                    className="w-full px-4 py-2 text-left text-sm text-text-main dark:text-white hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center justify-between"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <Globe size={16} />
+                                        Landing Page
+                                    </div>
+                                    <ExternalLink size={12} className="text-text-secondary" />
+                                </a>
                                 <button
                                     onClick={() => { navigate('/settings/users'); setShowUserMenu(false) }}
                                     className="w-full px-4 py-2 text-left text-sm text-text-main dark:text-white hover:bg-slate-50 dark:hover:bg-gray-700 flex items-center gap-2"

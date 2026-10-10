@@ -29,7 +29,7 @@ export interface P5Project {
 export type GradeFormData = Omit<Grade, 'id' | 'createdAt' | 'updatedAt' | 'student' | 'subject'>
 
 export function useGrades(params?: Record<string, string | number | undefined>) {
-    const { data: grades, loading, error, refetch, meta } = useFetch<Grade[]>('/api/grades', params, {
+    const { data: grades, loading, error, refetch } = useFetch<Grade[]>('/api/grades', params, {
         initialData: []
     })
 
@@ -40,7 +40,6 @@ export function useGrades(params?: Record<string, string | number | undefined>) 
         loading,
         mutationLoading,
         error,
-        meta,
         refetch,
         create,
         update,
@@ -53,10 +52,17 @@ export function useP5Projects(params?: Record<string, string | number | undefine
         initialData: []
     })
 
+    const { create, update, remove, loading: mutationLoading } = useMutations<P5Project, Omit<P5Project, 'id'>>('/api/grades/p5-projects')
+
     return {
         projects,
         loading,
+        mutationLoading,
         error,
-        refetch
+        refetch,
+        createProject: create,
+        updateProject: update,
+        removeProject: remove
     }
 }
+

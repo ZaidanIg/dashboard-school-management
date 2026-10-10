@@ -17,7 +17,9 @@ import {
     FileText,
     CalendarDays,
     Award,
-    UserPlus
+    UserPlus,
+    Globe,
+    Newspaper
 } from 'lucide-react'
 import { useAuthContext } from '../../contexts/AuthContext'
 
@@ -35,6 +37,18 @@ const adminMenuItems: MenuItem[] = [
         label: 'Dashboard',
         icon: <LayoutDashboard size={20} />,
         path: '/dashboard',
+    },
+    {
+        id: 'portal-berita',
+        label: 'Portal Berita',
+        icon: <Newspaper size={20} />,
+        path: '/news',
+    },
+    {
+        id: 'landing-page',
+        label: 'Landing Page',
+        icon: <Globe size={20} />,
+        path: '/home',
     },
     {
         id: 'school-profile',
@@ -275,7 +289,7 @@ export default function Sidebar() {
                 </div>
                 <div>
                     <h1 className="text-lg font-bold text-text-main dark:text-white leading-tight">
-                        Artefact
+                        EduManage
                     </h1>
                     <p className="text-xs text-text-secondary dark:text-gray-400 font-medium">
                         {user?.role === 'STUDENT' ? 'Student Portal' : 'Admin Portal'}

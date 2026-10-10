@@ -33,7 +33,7 @@ export type InventoryFormData = Omit<InventoryItem, 'id'>
 export type MaintenanceFormData = Omit<MaintenanceRecord, 'id' | 'inventory'>
 
 export function useInventory(params?: Record<string, string | number | undefined>) {
-    const { data: inventory, loading, error, refetch, meta } = useFetch<InventoryItem[]>('/api/infrastructure/inventory', params, {
+    const { data: inventory, loading, error, refetch } = useFetch<InventoryItem[]>('/api/infrastructure/inventory', params, {
         initialData: []
     })
 
@@ -44,7 +44,6 @@ export function useInventory(params?: Record<string, string | number | undefined
         loading,
         mutationLoading,
         error,
-        meta,
         refetch,
         create,
         update,
@@ -53,7 +52,7 @@ export function useInventory(params?: Record<string, string | number | undefined
 }
 
 export function useMaintenance(params?: Record<string, string | number | undefined>) {
-    const { data: maintenance, loading, error, refetch, meta } = useFetch<MaintenanceRecord[]>('/api/infrastructure/maintenance', params, {
+    const { data: maintenance, loading, error, refetch } = useFetch<MaintenanceRecord[]>('/api/infrastructure/maintenance', params, {
         initialData: []
     })
 
@@ -64,7 +63,6 @@ export function useMaintenance(params?: Record<string, string | number | undefin
         loading,
         mutationLoading,
         error,
-        meta,
         refetch,
         create,
         update,

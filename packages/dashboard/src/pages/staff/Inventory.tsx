@@ -19,7 +19,7 @@ export default function StaffInventory() {
     if (condition) params.condition = condition
     if (category) params.category = category
 
-    const { inventory, loading, error, meta, refetch } = useInventory(params)
+    const { inventory, loading, error } = useInventory(params)
 
     const columns: Column<InventoryItem>[] = [
         {
@@ -49,7 +49,7 @@ export default function StaffInventory() {
     ]
 
     const stats = [
-        { label: 'Total Item', value: meta?.total?.toString() || '0', icon: Package, iconBg: 'bg-blue-50 dark:bg-blue-900/30', iconColor: 'text-blue-600' },
+        { label: 'Total Item', value: inventory.length.toString(), icon: Package, iconBg: 'bg-blue-50 dark:bg-blue-900/30', iconColor: 'text-blue-600' },
         { label: 'Kondisi Baik', value: inventory.filter(i => i.condition === 'GOOD').length.toString(), icon: Check, iconBg: 'bg-emerald-50 dark:bg-emerald-900/30', iconColor: 'text-emerald-600' },
         { label: 'Perlu Perbaikan', value: inventory.filter(i => i.condition === 'FAIR').length.toString(), icon: Wrench, iconBg: 'bg-amber-50 dark:bg-amber-900/30', iconColor: 'text-amber-600' },
         { label: 'Rusak', value: inventory.filter(i => i.condition === 'POOR' || i.condition === 'DAMAGED').length.toString(), icon: AlertTriangle, iconBg: 'bg-rose-50 dark:bg-rose-900/30', iconColor: 'text-rose-600' }
@@ -124,8 +124,8 @@ export default function StaffInventory() {
                     onEdit={() => { }}
                     onDelete={() => { }}
                     currentPage={page}
-                    totalPages={meta?.totalPages || 1}
-                    totalItems={meta?.total || 0}
+                    totalPages={1}
+                    totalItems={inventory.length}
                     onPageChange={setPage}
                 />
             )}

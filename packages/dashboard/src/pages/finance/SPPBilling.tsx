@@ -1,6 +1,4 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { CreditCard, AlertCircle, Check, Clock, Bell, MessageSquare } from 'lucide-react'
+import { CreditCard, AlertCircle, Check, Clock, MessageSquare } from 'lucide-react'
 import PageHeader from '@/components/common/PageHeader'
 import FilterBar from '@/components/common/FilterBar'
 import DataTable, { type Column } from '@/components/common/DataTable'
@@ -13,7 +11,6 @@ import { useToast } from '@/contexts/ToastContext'
 import type { SPPBilling } from '@/types'
 
 export default function SPPBillingPage() {
-    const navigate = useNavigate()
     const { billings, loading, error, meta, refetch } = useBillings()
     const { sendNotification, loading: actionLoading } = useBillingActions()
     const toast = useToast()
@@ -136,7 +133,7 @@ export default function SPPBillingPage() {
                 columns={columns}
                 // @ts-ignore
                 data={billings}
-                onView={(billing) => {
+                onView={() => {
                     // Navigate to billing detail? Or just show modal?
                     // navigate(`/finance/billing/${billing.id}`)
                 }}

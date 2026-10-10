@@ -4,7 +4,7 @@ import { NumericInput } from './inputs/NumericInput'
 import { DescriptiveInput } from './inputs/DescriptiveInput'
 import { TextInput } from './inputs/TextInput'
 import { FileInput } from './inputs/FileInput'
-import { Save, X, Upload, AlertCircle } from 'lucide-react'
+import { Save, X, AlertCircle } from 'lucide-react'
 
 interface DynamicGradeFormProps {
     curriculumConfig: CurriculumConfig

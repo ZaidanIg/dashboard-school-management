@@ -439,7 +439,7 @@ export default function StudentDashboard() {
                         </div>
                     ) : recentAnnouncements.length > 0 ? (
                         <div className="space-y-4">
-                            {recentAnnouncements.map(announcement => (
+                            {recentAnnouncements.map((announcement: any) => (
                                 <div
                                     key={announcement.id}
                                     className="p-4 rounded-xl border border-border-color dark:border-gray-700 hover:border-primary/30 hover:bg-slate-50 dark:hover:bg-gray-700/30 transition-all cursor-pointer group"

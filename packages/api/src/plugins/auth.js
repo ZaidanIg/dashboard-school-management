@@ -29,7 +29,7 @@ export const auth = betterAuth({
             await transporter.sendMail({
                 from: config.smtp.from,
                 to: user.email,
-                subject: 'Reset Password - Artefact',
+                subject: 'Reset Password - EduManage',
                 html: `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                         <h2>Reset Password</h2>
@@ -49,12 +49,12 @@ export const auth = betterAuth({
             await transporter.sendMail({
                 from: config.smtp.from,
                 to: user.email,
-                subject: 'Verifikasi Email - Artefact',
+                subject: 'Verifikasi Email - EduManage',
                 html: `
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                         <h2>Verifikasi Email</h2>
                         <p>Halo ${user.name},</p>
-                        <p>Terima kasih telah mendaftar di Artefact!</p>
+                        <p>Terima kasih telah mendaftar di EduManage!</p>
                         <a href="${url}" style="display: inline-block; padding: 12px 24px; background: #3b82f6; color: white; text-decoration: none; border-radius: 6px;">Verifikasi Email</a>
                     </div>
                 `

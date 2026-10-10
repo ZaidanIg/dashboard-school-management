@@ -6,7 +6,7 @@ import DataTable, { type Column } from '@/components/common/DataTable'
 import StatusBadge from '@/components/common/StatusBadge'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import { useTeachers } from '@/hooks/useTeachers'
-import type { Teacher } from '@/types/api'
+import type { Teacher } from '@/types'
 
 export default function StaffTeachers() {
     const [search, setSearch] = useState('')

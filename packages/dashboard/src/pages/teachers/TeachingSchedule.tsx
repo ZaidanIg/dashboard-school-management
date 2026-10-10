@@ -2,7 +2,7 @@
 import { useState, useMemo } from 'react'
 import { Clock, Users, CalendarX, Loader2 } from 'lucide-react'
 import PageHeader from '@/components/common/PageHeader'
-import FilterBar from '@/components/common/FilterBar'
+
 import { useFetch } from '@/hooks/useShared'
 
 

@@ -123,6 +123,8 @@ model School {
   gallery       GalleryItem[]
   achievements  Achievement[]
   organizations StudentOrganization[]
+  structures    SchoolStructure[]
+  articles      Article[]
 
   @@map("schools")
 }
@@ -324,6 +326,34 @@ enum AchievementLevel {
   INTERNASIONAL
 }
 
+model SchoolStructure {
+  id          String            @id @default(cuid())
+  schoolId    String
+  name        String
+  position    String            // Kepala Sekolah, Wakasek Kurikulum, Komite, dll
+  category    StructureCategory @default(LEADERSHIP)
+  department  String?           // MIPA, IPS, Tata Usaha, dll
+  phone       String?
+  email       String?
+  photo       String?
+  greeting    String?           @db.Text
+  order       Int               @default(0)
+  teacherId   String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  school  School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  teacher Teacher? @relation(fields: [teacherId], references: [id])
+
+  @@map("school_structures")
+}
+
+enum StructureCategory {
+  LEADERSHIP
+  DEPARTMENT
+  COMMITTEE
+}
+
 model StudentOrganization {
   id        String   @id @default(cuid())
   schoolId  String
@@ -331,6 +361,9 @@ model StudentOrganization {
   type      OrgType
   period    String
   advisorId String?
+  vision    String?  @db.Text
+  mission   String[]
+  programs  Json?    // Array of { id, name, status, date, description, coordinator }
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -350,12 +383,17 @@ enum OrgType {
 model OrgMember {
   id             String   @id @default(cuid())
   organizationId String
-  studentId      String
+  studentId      String?
+  name           String?
+  className      String?
+  section        String?  // Seksi/Komisi/Divisi
   position       String
+  photo          String?
+  order          Int      @default(0)
   createdAt      DateTime @default(now())
 
   organization StudentOrganization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  student      Student             @relation(fields: [studentId], references: [id])
+  student      Student?            @relation(fields: [studentId], references: [id])
 
   @@map("org_members")
 }
@@ -563,6 +601,7 @@ model Teacher {
   achievements      Achievement[]
   advisedOrgs       StudentOrganization[]
   advisedExtras     Extracurricular[]
+  structures        SchoolStructure[]
   permits           TeacherPermit[]
   assignments       Assignment[]
 
@@ -1376,6 +1415,36 @@ model Letter {
   updatedAt     DateTime     @updatedAt
 
   @@map("letters")
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Article {
+  id          String        @id @default(cuid())
+  schoolId    String?
+  title       String
+  slug        String        @unique
+  content     String        @db.Text
+  excerpt     String?       @db.Text
+  coverImage  String?
+  category    String        @default("Berita")
+  authorName  String?
+  authorId    String?
+  status      ArticleStatus @default(PUBLISHED)
+  views       Int           @default(0)
+  publishedAt DateTime      @default(now())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  school      School?       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([category])
+  @@index([status])
+  @@map("articles")
 }
 
 enum LetterType {

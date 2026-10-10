@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react'
 import type { Teacher } from '../../types'
-import { Save, User, MapPin, BookOpen, Wand2, GraduationCap, Upload, FileText, X } from 'lucide-react'
+import { Save, User, MapPin, BookOpen, RefreshCw, GraduationCap, Upload, FileText, X } from 'lucide-react'
 import { useSubjects } from '@/hooks/useAcademic'
 
 interface TeacherFormProps {
@@ -157,7 +157,7 @@ export default function TeacherForm({ initialData = {}, onSubmit, loading, onCan
                                         }}
                                         className="btn-secondary flex items-center gap-2"
                                     >
-                                        <Wand2 size={16} /> Generate
+                                        <RefreshCw size={16} /> Acak Password
                                     </button>
                                 </div>
                                 <p className="text-xs text-gray-500 mt-1">Digunakan untuk login ke Teacher Portal.</p>

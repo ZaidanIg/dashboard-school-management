@@ -1,5 +1,5 @@
 // API Base Configuration
-const API_URL = import.meta.env.VITE_API_URL || 'http://0.0.0.0:3001'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
 // Response types
 interface ApiResponse<T> {

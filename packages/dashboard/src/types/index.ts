@@ -284,6 +284,7 @@ export interface Role {
     name: string
     description?: string
     permissions: string[]
+    usersCount?: number
 }
 
 // Communication Types
@@ -577,6 +578,20 @@ export interface P7PenilaianTim {
     evaluatedAt: string
     tim?: TimP7
     siswa?: Student
+}
+
+// Prestasi / Achievement
+export interface Achievement {
+    id: string
+    schoolId?: string
+    title: string
+    category: string
+    level: string
+    year: number
+    description?: string
+    studentId?: string
+    teacherId?: string
+    createdAt?: string
 }
 
 // Portfolio Siswa

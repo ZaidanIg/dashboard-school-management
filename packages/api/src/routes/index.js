@@ -18,6 +18,8 @@ import { kurikulumMerdekaRoutes } from './kurikulumMerdeka.js'
 import { systemSettingsRoutes } from './systemSettings.js'
 import { ppdbRoutes } from './ppdb-routes.js'
 import { curriculumAgnosticRoutes } from './curriculumAgnostic.js'
+import { publicRoutes } from './public.js'
+import { articleRoutes } from './article.js'
 
 
 /**
@@ -60,6 +62,8 @@ export const registerRoutes = (server) => {
     server.route(systemSettingsRoutes)
     server.route(ppdbRoutes)
     server.route(curriculumAgnosticRoutes)
+    server.route(articleRoutes)
+    server.route(publicRoutes)
 
     console.log('✅ All routes registered')
 }

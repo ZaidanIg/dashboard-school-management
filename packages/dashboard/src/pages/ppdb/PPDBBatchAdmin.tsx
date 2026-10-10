@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { CalendarDays, Plus, Edit, Trash2, X } from 'lucide-react'
+import { api } from '@/lib/api'
 
 interface PPDBBatch {
     id: string
@@ -39,9 +40,8 @@ export default function PPDBBatchAdmin() {
 
     const fetchBatches = async () => {
         try {
-            const res = await fetch('http://localhost:3001/ppdb/batches')
-            const data = await res.json()
-            setBatches(data)
+            const data = await api.get<PPDBBatch[]>('/ppdb/batches')
+            setBatches(Array.isArray(data) ? data : [])
         } catch (error) {
             console.error('Failed to fetch batches', error)
         } finally {
@@ -51,9 +51,8 @@ export default function PPDBBatchAdmin() {
 
     const fetchAcademicYears = async () => {
         try {
-            const res = await fetch('http://localhost:3001/api/academic/years')
-            const data = await res.json()
-            setAcademicYears(data)
+            const data = await api.get<AcademicYear[]>('/api/academic/years')
+            setAcademicYears(Array.isArray(data) ? data : [])
         } catch (error) {
             console.error('Failed to fetch academic years', error)
         }
@@ -106,27 +105,19 @@ export default function PPDBBatchAdmin() {
                 ...formData,
                 id: editingBatch?.id
             }
-            const res = await fetch('http://localhost:3001/ppdb/batches', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            if (res.ok) {
-                setShowModal(false)
-                fetchBatches()
-            } else {
-                alert('Gagal menyimpan data')
-            }
+            await api.post('/ppdb/batches', payload)
+            setShowModal(false)
+            fetchBatches()
         } catch (error) {
             console.error('Failed to save batch', error)
-            alert('Terjadi kesalahan')
+            alert('Gagal menyimpan batch PPDB')
         }
     }
 
     const deleteBatch = async (id: string) => {
         if (!confirm('Yakin ingin menghapus batch ini?')) return
         try {
-            await fetch(`http://localhost:3001/ppdb/batches/${id}`, { method: 'DELETE' })
+            await api.delete(`/ppdb/batches/${id}`)
             fetchBatches()
         } catch (error) {
             console.error('Failed to delete batch', error)

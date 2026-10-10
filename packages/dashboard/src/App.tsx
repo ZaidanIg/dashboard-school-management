@@ -130,12 +130,20 @@ import OSIS from './pages/profile/OSIS'
 import MPK from './pages/profile/MPK'
 
 // Public Pages
-import LandingPage from './pages/public/LandingPage'
+import LandingPage from './pages/public/landing/LandingPage'
 import PPDBRegister from './pages/public/PPDBRegister'
+import NewsPortal from './pages/public/news/NewsPortal'
+import NewsDetail from './pages/public/news/NewsDetail'
+
+// News Portal Admin
+import NewsManagement from './pages/news/NewsManagement'
 
 // PPDB Admin
 import PPDBBatchAdmin from './pages/ppdb/PPDBBatchAdmin'
 import PPDBRegistrations from './pages/ppdb/PPDBRegistrations'
+
+// Common Components
+import CookieConsentBanner from './components/common/CookieConsentBanner'
 
 function GlobalToastListener() {
     const { addToast } = useToast()
@@ -201,8 +209,10 @@ function App() {
                             <Route path="/login" element={<Login />} />
                             <Route path="/signup" element={<Signup />} />
 
-                            {/* Public Landing Page */}
+                            {/* Public Landing Page & News Portal */}
                             <Route path="/home" element={<LandingPage />} />
+                            <Route path="/berita" element={<NewsPortal />} />
+                            <Route path="/berita/:slug" element={<NewsDetail />} />
                             <Route path="/ppdb/register" element={<PPDBRegister />} />
 
                             {/* Student Portal Routes (Authenticated Students Only) */}
@@ -284,6 +294,7 @@ function App() {
                             >
                                 {/* Dashboard moved to /dashboard */}
                                 <Route path="/dashboard" element={<Dashboard />} />
+                                <Route path="news" element={<NewsManagement />} />
 
                                 {/* Students */}
                                 <Route path="students" element={<StudentList />} />
@@ -371,6 +382,9 @@ function App() {
                             {/* 404 Not Found */}
                             <Route path="*" element={<NotFound />} />
                         </Routes>
+
+                        {/* Cookie Consent Banner for Public Portal / Landing */}
+                        <CookieConsentBanner />
                     </CurriculumProvider>
                 </div>
             </AuthProvider>

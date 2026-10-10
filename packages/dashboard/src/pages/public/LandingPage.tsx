@@ -1,23 +1,18 @@
 import { Link } from 'react-router-dom'
 import { useSchoolProfile } from '../../hooks/useSettings'
 import {
-    Users,
-    BookOpen,
     MapPin,
     Phone,
     Mail,
     Globe,
     GraduationCap,
-    Award,
     ChevronRight,
     ChevronLeft,
     ChevronDown,
-    Star,
     Trophy,
     ExternalLink,
     Menu,
     ArrowRight,
-    Sparkles,
     Target,
     Heart,
     Lightbulb,
@@ -28,52 +23,10 @@ import {
     Calculator,
     Dumbbell,
     Megaphone,
-    Send,
     Quote,
-    Play,
-    X,
     Check
 } from 'lucide-react'
-import { useState, useEffect, useRef } from 'react'
-
-// Animated Counter Hook
-function useCountUp(end: number, duration: number = 2000, startOnView: boolean = true) {
-    const [count, setCount] = useState(0)
-    const [hasStarted, setHasStarted] = useState(!startOnView)
-    const ref = useRef<HTMLDivElement>(null)
-
-    useEffect(() => {
-        if (startOnView && ref.current) {
-            const observer = new IntersectionObserver(
-                ([entry]) => {
-                    if (entry.isIntersecting && !hasStarted) {
-                        setHasStarted(true)
-                    }
-                },
-                { threshold: 0.5 }
-            )
-            observer.observe(ref.current)
-            return () => observer.disconnect()
-        }
-    }, [startOnView, hasStarted])
-
-    useEffect(() => {
-        if (!hasStarted) return
-
-        let startTime: number | null = null
-        const animate = (currentTime: number) => {
-            if (!startTime) startTime = currentTime
-            const progress = Math.min((currentTime - startTime) / duration, 1)
-            setCount(Math.floor(progress * end))
-            if (progress < 1) {
-                requestAnimationFrame(animate)
-            }
-        }
-        requestAnimationFrame(animate)
-    }, [end, duration, hasStarted])
-
-    return { count, ref }
-}
+import { useState, useEffect } from 'react'
 
 // Countdown Timer Hook
 function useCountdown(targetDate: Date) {
@@ -105,12 +58,9 @@ export default function LandingPage() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [activeTestimonial, setActiveTestimonial] = useState(0)
     const [activeFaq, setActiveFaq] = useState<number | null>(null)
-    const [showVideoModal, setShowVideoModal] = useState(false)
-    const [activeProgram, setActiveProgram] = useState(0)
-
     const [scrolled, setScrolled] = useState(false)
-    const [isHoveringProgram, setIsHoveringProgram] = useState(false)
     const [ppdbConfig, setPpdbConfig] = useState<any>(null)
+    const [activeProgram, setActiveProgram] = useState(0)
 
     // Navbar scroll effect
     useEffect(() => {
@@ -120,11 +70,6 @@ export default function LandingPage() {
         window.addEventListener('scroll', handleScroll)
         return () => window.removeEventListener('scroll', handleScroll)
     }, [])
-
-    // Animated counters
-    const studentsCounter = useCountUp(1200, 2000)
-    const ptnCounter = useCountUp(95, 2000)
-    const achievementsCounter = useCountUp(50, 2000)
 
     // Fetch PPDB Config
     useEffect(() => {
@@ -140,26 +85,8 @@ export default function LandingPage() {
         fetchPpdbConfig()
     }, [])
 
-    // PPDB Countdown - use API date or fallback
     const ppdbDeadline = ppdbConfig?.endDate ? new Date(ppdbConfig.endDate) : new Date('2024-06-30T23:59:59')
     const countdown = useCountdown(ppdbDeadline)
-
-    // Auto-rotate testimonials
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setActiveTestimonial((prev) => (prev + 1) % testimonials.length)
-        }, 5000)
-        return () => clearInterval(interval)
-    }, [])
-
-    // Auto-rotate programs
-    useEffect(() => {
-        if (isHoveringProgram) return
-        const interval = setInterval(() => {
-            setActiveProgram((prev) => (prev + 1) % programs.length)
-        }, 5000)
-        return () => clearInterval(interval)
-    }, [isHoveringProgram])
 
     // Programs data
     const programs = [
@@ -231,43 +158,22 @@ export default function LandingPage() {
 
     return (
         <div className="min-h-screen bg-sky-50/50 dark:bg-slate-900 text-slate-900 dark:text-white font-sans overflow-x-hidden antialiased selection:bg-sky-500/30">
-            {/* Video Modal */}
-            {showVideoModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm" onClick={() => setShowVideoModal(false)}>
-                    <div className="relative w-full max-w-4xl mx-4 aspect-video bg-black rounded-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-                        <button
-                            className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/40 transition-colors"
-                            onClick={() => setShowVideoModal(false)}
-                        >
-                            <X size={24} className="text-white" />
-                        </button>
-                        <div className="w-full h-full flex items-center justify-center text-white">
-                            <div className="text-center">
-                                <Play size={64} className="mx-auto mb-4 opacity-50" />
-                                <p className="text-lg">Video Profile Sekolah</p>
-                                <p className="text-sm text-white/60">Video akan diputar di sini</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             <div className="relative flex min-h-screen flex-col">
                 {/* Header */}
                 <header className={`fixed top-0 z-40 w-full transition-all duration-300 ${scrolled
-                    ? 'border-b border-white/50 dark:border-white/5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md shadow-sm h-20'
+                    ? 'border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-sm h-20'
                     : 'bg-transparent h-24 border-transparent'
                     }`}>
                     <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6 lg:px-8">
                         <div className="flex items-center gap-3">
-                            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-teal-500 text-white shadow-lg shadow-sky-500/20 animate-pulse">
+                            <div className="flex size-10 items-center justify-center rounded-xl bg-sky-600 text-white shadow-sm">
                                 <GraduationCap size={24} />
                             </div>
                             <div>
-                                <span className="text-lg font-extrabold tracking-tight block">{school?.name || 'SEKOLAH UNGGULAN'}</span>
-                                <span className={`text-xs ${scrolled ? 'text-slate-500' : 'text-slate-600 dark:text-slate-300'}`}>NPSN: {school?.npsn || '12345678'}</span>
+                                <span className="text-lg font-bold tracking-tight block">{school?.name || 'SEKOLAH UNGGULAN'}</span>
+                                <span className={`text-xs ${scrolled ? 'text-slate-500' : 'text-slate-600 dark:text-slate-400'}`}>NPSN: {school?.npsn || '12345678'}</span>
                             </div>
-                        </div >
+                        </div>
                         <nav className="hidden md:flex items-center gap-8">
                             {[
                                 { label: 'Program', href: '#programs' },
@@ -279,7 +185,7 @@ export default function LandingPage() {
                             ].map((item) => (
                                 <a
                                     key={item.href}
-                                    className={`text-sm font-semibold transition-colors relative group ${scrolled ? 'text-slate-500 hover:text-sky-500' : 'text-slate-600 dark:text-slate-300 hover:text-sky-500'
+                                    className={`text-sm font-semibold transition-colors relative group ${scrolled ? 'text-slate-600 hover:text-sky-600' : 'text-slate-700 dark:text-slate-300 hover:text-sky-500'
                                         }`}
                                     href={item.href}
                                     onClick={(e) => handleSmoothScroll(e, item.href)}
@@ -290,43 +196,42 @@ export default function LandingPage() {
                             ))}
                         </nav>
                         <div className="flex items-center gap-3">
-                            <Link to="/login" className={`hidden md:flex h-10 items-center justify-center rounded-lg border px-4 text-sm font-semibold transition-all hover:scale-105 ${scrolled
-                                ? 'border-slate-200 hover:bg-slate-50'
-                                : 'border-slate-300 bg-white/50 hover:bg-white backdrop-blur-sm'
-                                }`}>
+                            <Link to="/login" className="hidden md:flex h-10 items-center justify-center rounded-lg border border-slate-300 dark:border-slate-700 px-4 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                                 Masuk
                             </Link>
                             <Link
                                 to="/ppdb/register"
-                                className="hidden md:flex h-10 items-center justify-center rounded-lg bg-gradient-to-r from-sky-500 to-teal-500 text-white px-6 text-sm font-bold shadow-lg shadow-sky-500/20 hover:shadow-xl transition-all hover:scale-105 animate-pulse"
+                                className="hidden md:flex h-10 items-center justify-center rounded-lg bg-sky-600 hover:bg-sky-700 text-white px-5 text-sm font-semibold shadow-sm transition-colors"
                             >
-                                Daftar Sekarang
+                                Daftar PPDB
                             </Link>
-                            <button className="flex md:hidden items-center justify-center p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                            <button className="flex md:hidden items-center justify-center p-2 text-slate-700 dark:text-slate-200" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                                 <Menu size={24} />
                             </button>
                         </div>
                     </div>
                     {mobileMenuOpen && (
-                        <div className="md:hidden border-t border-gray-100 bg-white dark:bg-slate-800 p-4 animate-slideDown shadow-xl">
-                            <nav className="flex flex-col gap-4">
+                        <div className="md:hidden border-t border-slate-200 bg-white dark:bg-slate-800 p-4 shadow-xl">
+                            <nav className="flex flex-col gap-3">
                                 {['Program', 'Keunggulan', 'Galeri', 'Prestasi', 'FAQ', 'PPDB'].map((item) => (
                                     <a
                                         key={item}
-                                        className="text-sm font-semibold text-slate-600 hover:text-sky-500 py-2"
+                                        className="text-sm font-semibold text-slate-600 hover:text-sky-500 py-1.5"
                                         href={`#${item.toLowerCase()}`}
                                         onClick={(e) => handleSmoothScroll(e, `#${item.toLowerCase()}`)}
                                     >
                                         {item}
                                     </a>
                                 ))}
-                                <Link to="/login" className="py-2 px-4 border border-slate-200 rounded-lg text-center font-semibold">Masuk</Link>
-                                <Link
-                                    to="/ppdb/register"
-                                    className="py-2 px-4 bg-gradient-to-r from-sky-500 to-teal-500 text-white rounded-lg text-center font-bold"
-                                >
-                                    Daftar Sekarang
-                                </Link>
+                                <div className="flex gap-2 pt-2 border-t border-slate-100 dark:border-slate-700">
+                                    <Link to="/login" className="flex-1 py-2 text-center border border-slate-300 rounded-lg text-sm font-semibold">Masuk</Link>
+                                    <Link
+                                        to="/ppdb/register"
+                                        className="flex-1 py-2 text-center bg-sky-600 text-white rounded-lg text-sm font-semibold"
+                                    >
+                                        Daftar PPDB
+                                    </Link>
+                                </div>
                             </nav>
                         </div>
                     )}
@@ -334,84 +239,54 @@ export default function LandingPage() {
 
                 <main className="flex-grow">
                     {/* Hero Section */}
-                    <section className="relative overflow-hidden pt-32 pb-20 lg:pt-40 lg:pb-32 bg-gradient-to-b from-sky-50 via-white to-white dark:from-slate-900 dark:via-slate-800 dark:to-slate-800">
-                        <div className="absolute -top-40 right-0 -z-10 h-[600px] w-[600px] rounded-full bg-sky-500/5 blur-3xl animate-pulse"></div>
-                        <div className="absolute top-40 -left-20 -z-10 h-[300px] w-[300px] rounded-full bg-teal-500/10 blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-
+                    <section className="relative overflow-hidden pt-32 pb-20 lg:pt-36 lg:pb-28 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
                         <div className="mx-auto max-w-7xl px-6 lg:px-8">
                             <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
                                 <div className="flex flex-col gap-6 text-center lg:text-left">
-                                    <div className="inline-flex w-fit items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 mx-auto lg:mx-0 animate-bounce" style={{ animationDuration: '2s' }}>
-                                        <Sparkles size={14} className="text-amber-500" />
-                                        <span className="text-xs font-bold uppercase tracking-wide text-amber-700 dark:text-amber-400">PPDB 2024/2025 Dibuka!</span>
+                                    <div className="inline-flex w-fit items-center gap-2 rounded-full border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/40 px-3.5 py-1 mx-auto lg:mx-0">
+                                        <Megaphone size={14} className="text-sky-600 dark:text-sky-400" />
+                                        <span className="text-xs font-semibold text-sky-800 dark:text-sky-300">Penerimaan Peserta Didik Baru (PPDB) Telah Dibuka</span>
                                     </div>
-                                    <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight">
-                                        Raih <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-teal-500 animate-gradient">Masa Depan Cerah</span> Bersama Kami
+                                    <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.15] tracking-tight text-slate-900 dark:text-white">
+                                        Mewujudkan Pendidikan Unggul & Berkarakter
                                     </h1>
-                                    <p className="text-lg leading-relaxed text-slate-500 dark:text-slate-300 max-w-xl mx-auto lg:mx-0">
-                                        Bergabunglah dengan ribuan siswa berprestasi. Kami siap mengantarkanmu menuju perguruan tinggi impian dengan program unggulan dan fasilitas terbaik.
+                                    <p className="text-lg leading-relaxed text-slate-600 dark:text-slate-300 max-w-xl mx-auto lg:mx-0">
+                                        Selamat datang di portal resmi {school?.name || 'Sekolah Unggulan'}. Kami berkomitmen mencetak generasi berprestasi, berintegritas tinggi, dan siap bersaing di masa depan.
                                     </p>
-                                    <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start pt-4">
-                                        <Link to="/ppdb/register" className="group h-14 min-w-[200px] rounded-xl bg-gradient-to-r from-sky-500 to-teal-500 px-8 text-lg font-bold text-white shadow-lg shadow-sky-500/30 transition-all hover:shadow-xl active:scale-95 flex items-center justify-center gap-2 hover:gap-4">
-                                            🎓 Daftar Sekarang
-                                            <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
+                                    <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start pt-2">
+                                        <Link to="/ppdb/register" className="h-12 min-w-[180px] rounded-lg bg-sky-600 hover:bg-sky-700 px-6 text-base font-semibold text-white shadow-sm transition-colors flex items-center justify-center gap-2">
+                                            Daftar PPDB Online
+                                            <ArrowRight size={18} />
                                         </Link>
-                                        <button onClick={() => setShowVideoModal(true)} className="group h-14 min-w-[200px] rounded-xl border-2 border-slate-200 bg-white px-8 text-lg font-bold shadow-sm transition-all hover:border-sky-500 hover:bg-sky-50 flex items-center justify-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center group-hover:bg-sky-500 group-hover:text-white transition-colors">
-                                                <Play size={18} className="ml-0.5" />
-                                            </div>
-                                            Tonton Video
-                                        </button>
+                                        <a href="#programs" onClick={(e) => handleSmoothScroll(e, '#programs')} className="h-12 min-w-[160px] rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-6 text-base font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-center">
+                                            Lihat Program
+                                        </a>
                                     </div>
 
-                                    {/* Animated Stats */}
-                                    <div ref={studentsCounter.ref} className="grid grid-cols-3 gap-4 pt-6 mt-4 border-t border-slate-100 dark:border-white/10">
-                                        <div className="text-center lg:text-left group cursor-pointer">
-                                            <p className="text-3xl font-extrabold text-sky-500 group-hover:scale-110 transition-transform inline-block">{studentsCounter.count}+</p>
-                                            <p className="text-sm text-slate-500">Siswa Aktif</p>
+                                    {/* Stats */}
+                                    <div className="grid grid-cols-3 gap-4 pt-6 mt-2 border-t border-slate-100 dark:border-slate-800">
+                                        <div className="text-center lg:text-left">
+                                            <p className="text-2xl sm:text-3xl font-bold text-sky-600 dark:text-sky-400">1.200+</p>
+                                            <p className="text-xs sm:text-sm text-slate-500">Siswa Aktif</p>
                                         </div>
-                                        <div ref={ptnCounter.ref} className="text-center lg:text-left group cursor-pointer">
-                                            <p className="text-3xl font-extrabold text-teal-500 group-hover:scale-110 transition-transform inline-block">{ptnCounter.count}%</p>
-                                            <p className="text-sm text-slate-500">Lulus PTN</p>
+                                        <div className="text-center lg:text-left">
+                                            <p className="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-200">A</p>
+                                            <p className="text-xs sm:text-sm text-slate-500">Akreditasi</p>
                                         </div>
-                                        <div ref={achievementsCounter.ref} className="text-center lg:text-left group cursor-pointer">
-                                            <p className="text-3xl font-extrabold text-amber-500 group-hover:scale-110 transition-transform inline-block">{achievementsCounter.count}+</p>
-                                            <p className="text-sm text-slate-500">Prestasi</p>
+                                        <div className="text-center lg:text-left">
+                                            <p className="text-2xl sm:text-3xl font-bold text-amber-600 dark:text-amber-400">50+</p>
+                                            <p className="text-xs sm:text-sm text-slate-500">Prestasi Juara</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Hero Image with interactive elements */}
-                                <div className="relative mx-auto w-full max-w-[500px] lg:max-w-none group">
-                                    <div className="relative overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-slate-700 aspect-[4/3] border-4 border-white dark:border-white/5 transition-transform duration-500 group-hover:scale-[1.02]">
-                                        <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/20 to-transparent z-10 pointer-events-none"></div>
-                                        <img alt="Students in modern school" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" src="/images/school-hero.png" />
-
-                                        {/* Play button overlay */}
-                                        <button
-                                            onClick={() => setShowVideoModal(true)}
-                                            className="absolute inset-0 z-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                        >
-                                            <div className="w-20 h-20 rounded-full bg-white/90 flex items-center justify-center shadow-2xl hover:scale-110 transition-transform">
-                                                <Play size={32} className="text-sky-500 ml-1" />
-                                            </div>
-                                        </button>
-
-                                        {/* Floating Badge */}
-                                        <div className="absolute bottom-6 left-6 z-20 bg-white/95 p-4 rounded-2xl shadow-xl border border-gray-100 backdrop-blur-sm hover:scale-105 transition-transform cursor-pointer">
-                                            <div className="flex items-center gap-3">
-                                                <div className="p-3 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl text-white shadow-lg animate-pulse">
-                                                    <Star size={24} />
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs text-slate-500 font-bold uppercase">Akreditasi</p>
-                                                    <p className="text-2xl font-extrabold">{school?.accreditation || 'A'}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="absolute top-6 right-6 z-20 bg-white/95 px-4 py-2 rounded-full shadow-lg border border-gray-100 backdrop-blur-sm flex items-center gap-2 hover:scale-105 transition-transform cursor-pointer">
-                                            <BookOpen size={16} className="text-teal-500" />
-                                            <span className="text-sm font-bold">Kurikulum Merdeka</span>
+                                {/* Hero Image */}
+                                <div className="relative mx-auto w-full max-w-[500px] lg:max-w-none">
+                                    <div className="relative overflow-hidden rounded-2xl bg-slate-100 dark:bg-slate-800 shadow-md aspect-[4/3] border border-slate-200 dark:border-slate-700">
+                                        <img alt="Kegiatan Siswa di Sekolah" className="h-full w-full object-cover" src="/images/school-hero.png" />
+                                        <div className="absolute bottom-4 left-4 z-10 bg-white/95 dark:bg-slate-900/90 px-4 py-2.5 rounded-xl shadow-md border border-slate-200/60 dark:border-slate-700 backdrop-blur-sm">
+                                            <p className="text-xs text-slate-500 font-semibold uppercase">Kurikulum</p>
+                                            <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{school?.curriculum || 'Kurikulum Merdeka'}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -444,8 +319,6 @@ export default function LandingPage() {
                     <section
                         className="py-20 bg-sky-50/50 dark:bg-slate-900"
                         id="programs"
-                        onMouseEnter={() => setIsHoveringProgram(true)}
-                        onMouseLeave={() => setIsHoveringProgram(false)}
                     >
                         <div className="mx-auto max-w-7xl px-6 lg:px-8">
                             <div className="text-center mb-12">
@@ -519,7 +392,7 @@ export default function LandingPage() {
                                                     className="w-full h-full object-cover transition-transform duration-500 group-hover/item:scale-110"
                                                     onError={(e) => {
                                                         const target = e.target as HTMLImageElement;
-                                                        target.src = 'https://placehold.co/600x400';
+                                                        target.src = '/images/school-hero.png';
                                                     }}
                                                 />
                                             </div>
@@ -570,8 +443,8 @@ export default function LandingPage() {
                                     <div className="aspect-square rounded-2xl overflow-hidden shadow-lg hover:scale-105 transition-transform cursor-pointer">
                                         <img src="/images/school-hero.png" alt="Achievement" className="w-full h-full object-cover" />
                                     </div>
-                                    <div className="aspect-square rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 flex flex-col items-center justify-center text-white p-6 shadow-lg hover:scale-105 transition-transform cursor-pointer group">
-                                        <Trophy size={48} className="mb-4 group-hover:animate-bounce" />
+                                    <div className="aspect-square rounded-2xl bg-amber-500 flex flex-col items-center justify-center text-white p-6 shadow-md">
+                                        <Trophy size={48} className="mb-4 text-amber-100" />
                                         <p className="text-4xl font-extrabold">50+</p>
                                         <p className="text-sm font-medium text-amber-100">Prestasi</p>
                                     </div>
@@ -709,13 +582,13 @@ export default function LandingPage() {
                             {/* CTA */}
                             <div className="text-center">
                                 {ppdbConfig?.isOpen ? (
-                                    <Link to="/ppdb/register" className="inline-flex h-14 items-center justify-center rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 px-10 text-lg font-bold text-slate-900 shadow-xl shadow-amber-500/20 hover:shadow-2xl transition-all gap-2 hover:scale-105 group">
-                                        🎓 Daftar PPDB Online
-                                        <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                                    <Link to="/ppdb/register" className="inline-flex h-12 items-center justify-center rounded-lg bg-amber-500 hover:bg-amber-600 px-8 text-base font-bold text-slate-950 shadow-md transition-colors gap-2">
+                                        Daftar PPDB Online
+                                        <ArrowRight size={18} />
                                     </Link>
                                 ) : (
-                                    <div className="inline-flex h-14 items-center justify-center rounded-xl bg-slate-700 px-10 text-lg font-semibold text-slate-400 cursor-not-allowed">
-                                        🔒 Pendaftaran Belum Dibuka
+                                    <div className="inline-flex h-12 items-center justify-center rounded-lg bg-slate-800 px-8 text-sm font-semibold text-slate-400">
+                                        Pendaftaran Belum Dibuka
                                     </div>
                                 )}
                                 <p className="mt-4 text-gray-400 text-sm">Hubungi: <span className="text-white font-medium">{school?.phone || '(021) 555-0123'}</span></p>
@@ -736,7 +609,7 @@ export default function LandingPage() {
                                             { icon: <Phone size={20} />, label: 'Telepon', value: school?.phone || '(021) 555-0123', color: 'teal' },
                                             { icon: <Mail size={20} />, label: 'Email', value: school?.email || 'info@sekolah.sch.id', color: 'purple' },
                                         ].map((item, idx) => (
-                                            <div key={idx} className="flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 hover:shadow-lg hover:scale-[1.02] transition-all cursor-pointer">
+                                            <div key={idx} className="flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-white/5 hover:shadow-sm transition-all">
                                                 <div className={`p-3 rounded-lg bg-${item.color}-100 text-${item.color}-500 dark:bg-${item.color}-900/30`}>
                                                     {item.icon}
                                                 </div>
@@ -748,8 +621,8 @@ export default function LandingPage() {
                                         ))}
                                     </div>
                                 </div>
-                                <div className="rounded-3xl overflow-hidden shadow-2xl h-80 lg:h-[400px] group">
-                                    <img src="/images/school-hero.png" alt="School Campus" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                <div className="rounded-2xl overflow-hidden shadow-md h-80 lg:h-[400px]">
+                                    <img src="/images/school-hero.png" alt="School Campus" className="w-full h-full object-cover" />
                                 </div>
                             </div>
                         </div>
@@ -762,7 +635,7 @@ export default function LandingPage() {
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                             <div className="col-span-1 md:col-span-2">
                                 <div className="flex items-center gap-2 mb-4">
-                                    <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-teal-500 text-white">
+                                    <div className="flex size-10 items-center justify-center rounded-xl bg-sky-600 text-white">
                                         <GraduationCap size={20} />
                                     </div>
                                     <span className="text-lg font-bold text-white">{school?.name || 'Sekolah Unggulan'}</span>
@@ -770,7 +643,7 @@ export default function LandingPage() {
                                 <p className="text-sm text-slate-400 mb-6 max-w-md">{school?.vision || 'Mewujudkan generasi unggul, berkarakter, dan berprestasi.'}</p>
                                 <div className="flex gap-4">
                                     {[Globe, ExternalLink, Mail].map((Icon, idx) => (
-                                        <a key={idx} className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-sky-500 transition-colors hover:scale-110" href="#">
+                                        <a key={idx} className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-sky-500 transition-colors" href="#">
                                             <Icon size={18} />
                                         </a>
                                     ))}
@@ -794,9 +667,9 @@ export default function LandingPage() {
                             </div>
                         </div>
                         <div className="flex flex-col md:flex-row items-center justify-between border-t border-white/10 pt-8 gap-4">
-                            <p className="text-sm text-slate-500">© 2024 {school?.name || 'Sekolah Unggulan'}. Hak Cipta Dilindungi.</p>
+                            <p className="text-sm text-slate-500">© {new Date().getFullYear()} {school?.name || 'Sekolah Unggulan'}. Hak Cipta Dilindungi.</p>
                             <div className="flex items-center gap-2 text-sm text-slate-500">
-                                <span>Powered by</span><span className="font-bold text-sky-400">Artefact</span>
+                                <span>Didukung oleh</span><span className="font-bold text-sky-400">EduManage</span>
                             </div>
                         </div>
                     </div>

@@ -25,6 +25,22 @@ export const createAnnouncement = async (request, h) => {
     return h.response(announcement).code(201)
 }
 
+export const updateAnnouncement = async (request, h) => {
+    const { id } = request.params
+    const updated = await prisma.announcement.update({
+        where: { id },
+        data: request.payload
+    })
+    return updated
+}
+
+export const deleteAnnouncement = async (request, h) => {
+    const { id } = request.params
+    await prisma.announcement.delete({ where: { id } })
+    return { success: true }
+}
+
+
 // Letters
 export const listLetters = async (request, h) => {
     const { page, limit, type, status } = request.query

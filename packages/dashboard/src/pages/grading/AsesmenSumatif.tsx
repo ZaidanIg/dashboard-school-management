@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { api } from '@/lib/api'
 import { FileCheck, Save, Loader2 } from 'lucide-react'
 
 interface Student {
@@ -126,12 +127,55 @@ export default function AsesmenSumatif() {
     }
 
     const handleSave = async () => {
+        if (!selectedClass || !selectedSubject) {
+            alert('Pilih kelas dan mata pelajaran terlebih dahulu')
+            return
+        }
+
         setSaving(true)
-        // TODO: Implement save to API
-        setTimeout(() => {
-            setSaving(false)
+        try {
+            // Convert to generic grade format
+            const gradesPayload: any[] = []
+            
+            studentData.forEach(s => {
+                if (s.utsScore !== null) {
+                    gradesPayload.push({
+                        studentId: s.studentId,
+                        subjectId: selectedSubject,
+                        academicYearId: 'temp-academic-year', // Should come from context
+                        semester: 'GANJIL', // Should come from context
+                        assessmentType: 'MIDTERM',
+                        scoreNumeric: s.utsScore,
+                    })
+                }
+                if (s.uasScore !== null) {
+                    gradesPayload.push({
+                        studentId: s.studentId,
+                        subjectId: selectedSubject,
+                        academicYearId: 'temp-academic-year', // Should come from context
+                        semester: 'GANJIL', // Should come from context
+                        assessmentType: 'FINAL',
+                        scoreNumeric: s.uasScore,
+                    })
+                }
+            })
+
+            if (gradesPayload.length === 0) {
+                alert('Tidak ada nilai untuk disimpan')
+                setSaving(false)
+                return
+            }
+
+            await api.post('/api/generic-grades/bulk', {
+                grades: gradesPayload
+            })
             alert('Data berhasil disimpan!')
-        }, 1000)
+        } catch (error) {
+            console.error('Failed to save grades', error)
+            alert('Gagal menyimpan data')
+        } finally {
+            setSaving(false)
+        }
     }
 
     const getPredikatColor = (predikat: string) => {

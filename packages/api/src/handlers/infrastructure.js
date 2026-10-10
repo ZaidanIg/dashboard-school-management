@@ -32,6 +32,22 @@ export const createInventoryItem = async (request, h) => {
     return h.response(item).code(201)
 }
 
+export const updateInventoryItem = async (request, h) => {
+    const { id } = request.params
+    const updated = await prisma.inventoryItem.update({
+        where: { id },
+        data: request.payload
+    })
+    return updated
+}
+
+export const deleteInventoryItem = async (request, h) => {
+    const { id } = request.params
+    await prisma.inventoryItem.delete({ where: { id } })
+    return { success: true }
+}
+
+
 // Rooms
 export const listRooms = async (request, h) => {
     const { type, isAvailable } = request.query
