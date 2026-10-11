@@ -26,8 +26,12 @@ export default function Login() {
                     navigate('/teacher-portal', { replace: true })
                 } else if (role === 'STUDENT') {
                     navigate('/student-portal', { replace: true })
-                } else {
+                } else if (role === 'STAFF') {
+                    navigate('/staff-portal', { replace: true })
+                } else if (role === 'SUPER_ADMIN' || role === 'ADMIN' || role === 'PRINCIPAL') {
                     navigate('/dashboard', { replace: true })
+                } else {
+                    navigate('/', { replace: true })
                 }
             }
         }
@@ -37,7 +41,7 @@ export default function Login() {
         <div className="min-h-screen bg-gradient-to-br from-primary via-blue-600 to-indigo-700 flex items-center justify-center p-4">
             {/* Back Button */}
             <Link
-                to="/home"
+                to="/"
                 className="absolute top-6 left-6 flex items-center gap-2 text-white/80 hover:text-white transition-colors"
             >
                 <ArrowLeft size={20} />

@@ -23,7 +23,11 @@ export default function Dashboard() {
             try {
                 const today = new Date().getDay()
                 const schedData = await api.get<any[]>(`/api/academic/schedules?dayOfWeek=${today}`)
-                if (schedData) setSchedules(schedData)
+                if (Array.isArray(schedData)) {
+                    setSchedules(schedData)
+                } else if (schedData && Array.isArray((schedData as any).data)) {
+                    setSchedules((schedData as any).data)
+                }
             } catch (error) {
                 console.error('Failed to fetch schedules', error)
             } finally {

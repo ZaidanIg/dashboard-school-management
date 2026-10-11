@@ -37,9 +37,13 @@ export default function Header({ onMenuClick }: HeaderProps) {
         const fetchActiveYear = async () => {
             try {
                 const res = await fetch('http://localhost:3001/api/academic/years')
+                if (!res.ok) return
                 const data = await res.json()
-                const active = data.find((y: AcademicYear) => y.isActive)
-                if (active) setActiveYear(active)
+                const items = Array.isArray(data) ? data : data?.data
+                if (Array.isArray(items)) {
+                    const active = items.find((y: AcademicYear) => y.isActive)
+                    if (active) setActiveYear(active)
+                }
             } catch (error) {
                 console.error('Failed to fetch academic years', error)
             }

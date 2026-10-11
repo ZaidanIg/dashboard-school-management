@@ -56,7 +56,7 @@ export function Hero({ school, schoolName, ppdb, onNavigate }: HeroProps) {
                         {ppdb?.isOpen ? (
                             <Link
                                 to="/ppdb/register"
-                                className="inline-flex h-11 sm:h-12 items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm sm:text-base font-bold text-blue-800 shadow-md hover:bg-blue-50 transition-all hover:gap-3"
+                                className="inline-flex h-11 sm:h-12 items-center justify-center gap-2 rounded-lg bg-white px-6 text-sm sm:text-base font-bold text-blue-800 shadow-md hover:bg-blue-50 transition-all"
                             >
                                 Daftar PPDB Online <ArrowRight size={18} />
                             </Link>
@@ -64,7 +64,7 @@ export function Hero({ school, schoolName, ppdb, onNavigate }: HeroProps) {
                             <a
                                 href="#ppdb"
                                 onClick={(e) => { e.preventDefault(); onNavigate('#ppdb') }}
-                                className="inline-flex h-11 sm:h-12 items-center justify-center gap-2 rounded-xl bg-white px-6 text-sm sm:text-base font-bold text-blue-800 shadow-md hover:bg-blue-50 transition-all hover:gap-3"
+                                className="inline-flex h-11 sm:h-12 items-center justify-center gap-2 rounded-lg bg-white px-6 text-sm sm:text-base font-bold text-blue-800 shadow-md hover:bg-blue-50 transition-all"
                             >
                                 Informasi PPDB <ArrowRight size={18} />
                             </a>
@@ -72,9 +72,9 @@ export function Hero({ school, schoolName, ppdb, onNavigate }: HeroProps) {
                         <a
                             href="#profil"
                             onClick={(e) => { e.preventDefault(); onNavigate('#profil') }}
-                            className="inline-flex h-11 sm:h-12 items-center justify-center rounded-xl px-6 text-sm sm:text-base font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/25 transition-all"
+                            className="inline-flex h-11 sm:h-12 items-center justify-center rounded-lg px-6 text-sm sm:text-base font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/25 transition-all"
                         >
-                            Kenali Profil Sekolah
+                            Profil Sekolah
                         </a>
                     </div>
 

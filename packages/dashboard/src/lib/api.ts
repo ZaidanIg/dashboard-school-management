@@ -28,6 +28,13 @@ class ApiEventEmitter {
     on(event: ApiEventType, handler: ApiEventHandler) {
         if (!this.listeners[event]) this.listeners[event] = []
         this.listeners[event].push(handler)
+        return () => this.off(event, handler)
+    }
+
+    off(event: ApiEventType, handler: ApiEventHandler) {
+        if (this.listeners[event]) {
+            this.listeners[event] = this.listeners[event].filter(h => h !== handler)
+        }
     }
 
     emit(event: ApiEventType, data: any) {

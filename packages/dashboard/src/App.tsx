@@ -144,15 +144,22 @@ import PPDBRegistrations from './pages/ppdb/PPDBRegistrations'
 
 // Common Components
 import CookieConsentBanner from './components/common/CookieConsentBanner'
+import RouteTitleUpdater from './components/common/RouteTitleUpdater'
+import ErrorBoundary from './components/common/ErrorBoundary'
 
 function GlobalToastListener() {
     const { addToast } = useToast()
 
     useEffect(() => {
         const handleError = (message: string) => {
+            // Avoid showing error toast for guest visitor session check
+            if (message?.toLowerCase() === 'unauthorized') return
             addToast('error', message)
         }
-        apiEvents.on('error', handleError)
+        const cleanup = apiEvents.on('error', handleError)
+        return () => {
+            cleanup?.()
+        }
     }, [addToast])
 
     return null
@@ -167,8 +174,8 @@ function Gateway() {
 
     // Not authenticated -> Public landing page
     if (!isAuthenticated) {
-        console.log('Gateway: Not authenticated, redirecting to /home (public)')
-        return <Navigate to="/home" replace />
+        console.log('Gateway: Not authenticated, redirecting to /')
+        return <Navigate to="/" replace />
     }
 
     // Student -> Student Portal
@@ -196,24 +203,29 @@ function Gateway() {
 
 function App() {
     return (
-        <ToastProvider>
-            <GlobalToastListener />
-            <AuthProvider>
-                <div className="bg-background-light dark:bg-background-dark font-display text-text-main dark:text-white antialiased">
-                    <CurriculumProvider>
-                        <Routes>
-                            {/* Default Route - Gateway decides where to go */}
-                            <Route path="/" element={<Gateway />} />
+        <ErrorBoundary>
+            <ToastProvider>
+                <GlobalToastListener />
+                <AuthProvider>
+                    <RouteTitleUpdater />
+                    <div className="bg-background-light dark:bg-background-dark font-display text-text-main dark:text-white antialiased">
+                        <CurriculumProvider>
+                            <Routes>
+                                {/* Public Landing Page as Root Route */}
+                                <Route path="/" element={<LandingPage />} />
+                                <Route path="/home" element={<LandingPage />} />
 
-                            {/* Auth Routes */}
-                            <Route path="/login" element={<Login />} />
-                            <Route path="/signup" element={<Signup />} />
+                                {/* Auto-route Gateway for direct portal jump */}
+                                <Route path="/gateway" element={<Gateway />} />
 
-                            {/* Public Landing Page & News Portal */}
-                            <Route path="/home" element={<LandingPage />} />
-                            <Route path="/berita" element={<NewsPortal />} />
-                            <Route path="/berita/:slug" element={<NewsDetail />} />
-                            <Route path="/ppdb/register" element={<PPDBRegister />} />
+                                {/* Auth Routes */}
+                                <Route path="/login" element={<Login />} />
+                                <Route path="/signup" element={<Signup />} />
+
+                                {/* News Portal & PPDB Public Routes */}
+                                <Route path="/berita" element={<NewsPortal />} />
+                                <Route path="/berita/:slug" element={<NewsDetail />} />
+                                <Route path="/ppdb/register" element={<PPDBRegister />} />
 
                             {/* Student Portal Routes (Authenticated Students Only) */}
                             <Route
@@ -389,6 +401,7 @@ function App() {
                 </div>
             </AuthProvider>
         </ToastProvider>
+    </ErrorBoundary>
     )
 }
 

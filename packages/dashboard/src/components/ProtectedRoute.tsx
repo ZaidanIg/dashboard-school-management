@@ -27,22 +27,25 @@ export default function ProtectedRoute({ children, requiredRoles }: ProtectedRou
     }
 
     if (requiredRoles && user && !requiredRoles.includes(user.role)) {
-        console.log('ProtectedRoute: Role mismatch')
-        // Prevent infinite loop: redirect to appropriate home
+        console.log('ProtectedRoute: Role mismatch for role', user.role, 'on path', location.pathname)
+        let targetPath = '/'
         if (user.role === 'STUDENT') {
-            console.log('ProtectedRoute: Redirecting Student to /student-portal')
-            return <Navigate to="/student-portal" replace />
+            targetPath = '/student-portal'
+        } else if (user.role === 'TEACHER') {
+            targetPath = '/teacher-portal'
+        } else if (user.role === 'STAFF') {
+            targetPath = '/staff-portal'
+        } else if (user.role === 'SUPER_ADMIN' || user.role === 'PRINCIPAL' || (user.role as string) === 'ADMIN') {
+            targetPath = '/dashboard'
         }
-        if (user.role === 'TEACHER') {
-            console.log('ProtectedRoute: Redirecting Teacher to /teacher-portal')
-            return <Navigate to="/teacher-portal" replace />
+
+        // Prevent infinite loop if already at targetPath
+        if (location.pathname === targetPath) {
+            console.log('ProtectedRoute: Already at targetPath but unauthorized, falling back to landing page')
+            return <Navigate to="/" replace />
         }
-        if (user.role === 'STAFF') {
-            console.log('ProtectedRoute: Redirecting Staff to /staff-portal')
-            return <Navigate to="/staff-portal" replace />
-        }
-        console.log('ProtectedRoute: Redirecting Admin/Other to /dashboard')
-        return <Navigate to="/dashboard" replace />
+
+        return <Navigate to={targetPath} replace />
     }
 
     return <>{children}</>
