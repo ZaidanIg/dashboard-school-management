@@ -39,7 +39,7 @@ export const listStudents = async (request, h) => {
         }
     }
 
-    const [students, total] = await Promise.all([
+    const [students, total, activeCount, inactiveCount, newCount] = await Promise.all([
         prisma.student.findMany({
             where,
             skip: (page - 1) * limit,
@@ -53,12 +53,33 @@ export const listStudents = async (request, h) => {
                 }
             }
         }),
-        prisma.student.count({ where })
+        prisma.student.count({ where }),
+        prisma.student.count({ where: { deletedAt: null, status: 'ACTIVE' } }),
+        prisma.student.count({ where: { deletedAt: null, status: 'INACTIVE' } }),
+        prisma.student.count({
+            where: {
+                deletedAt: null,
+                enrollmentDate: {
+                    gte: new Date(new Date().getFullYear(), 0, 1)
+                }
+            }
+        })
     ])
 
     return {
         data: students,
-        meta: { page, limit, total, totalPages: Math.ceil(total / limit) }
+        meta: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            stats: {
+                total,
+                active: activeCount,
+                inactive: inactiveCount,
+                newStudents: newCount
+            }
+        }
     }
 }
 

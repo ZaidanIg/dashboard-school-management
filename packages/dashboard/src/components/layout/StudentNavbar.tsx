@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAuthContext } from '../../contexts/AuthContext'
+import NotificationDropdown from '@/components/common/NotificationDropdown'
 import {
     LayoutDashboard,
     CalendarCheck,
@@ -31,16 +32,16 @@ export default function StudentNavbar() {
 
     return (
         <>
-            {/* Desktop Navigation (Top Bar) */}
-            <nav className="hidden md:block fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-border-color dark:border-gray-800">
+            {/* Top Navigation Bar */}
+            <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-border-color dark:border-gray-800">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         {/* Logo */}
-                        <Link to="/student/dashboard" className="flex items-center gap-2">
+                        <Link to="/student-portal" className="flex items-center gap-2">
                             <div className="p-1.5 bg-primary/10 rounded-lg text-primary">
                                 <School size={24} />
                             </div>
-                            <span className="text-lg font-bold text-text-main dark:text-white hidden md:block">
+                            <span className="text-base sm:text-lg font-bold text-text-main dark:text-white">
                                 Student Portal
                             </span>
                         </Link>
@@ -62,12 +63,16 @@ export default function StudentNavbar() {
                             ))}
                         </div>
 
-                        {/* User Profile */}
-                        <div className="relative">
-                            <button
-                                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                className="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
-                            >
+                        {/* Actions: Notifications & Profile */}
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <NotificationDropdown />
+
+                            {/* User Profile */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                                    className="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
+                                >
                                 <div
                                     className="size-8 rounded-full bg-cover bg-center bg-gray-200"
                                     style={{
@@ -115,6 +120,7 @@ export default function StudentNavbar() {
                                     </div>
                                 </>
                             )}
+                        </div>
                         </div>
                     </div>
                 </div>

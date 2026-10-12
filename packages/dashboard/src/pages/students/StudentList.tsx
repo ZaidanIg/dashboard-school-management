@@ -37,16 +37,17 @@ export default function StudentList() {
 
     const { deleteStudent, loading: isDeleting } = useStudentMutations()
 
-    // ... stats calculation code ...
-    const totalStudents = meta?.total || 0
-    const activeStudents = students.filter(s => s.status === 'ACTIVE').length
-    const inactiveStudents = students.filter(s => s.status === 'INACTIVE').length
+    // Real database aggregated stats from meta
+    const totalStudents = meta?.stats?.total ?? meta?.total ?? students.length
+    const activeStudents = meta?.stats?.active ?? students.filter(s => s.status === 'ACTIVE').length
+    const inactiveStudents = meta?.stats?.inactive ?? students.filter(s => s.status === 'INACTIVE').length
+    const newStudents = meta?.stats?.newStudents ?? 0
 
     const stats = [
         { label: 'Total Siswa', value: totalStudents.toLocaleString(), icon: Users, iconBg: 'bg-blue-50 dark:bg-blue-900/30', iconColor: 'text-primary' },
-        { label: 'Siswa Aktif', value: activeStudents.toString(), icon: UserCheck, iconBg: 'bg-emerald-50 dark:bg-emerald-900/30', iconColor: 'text-emerald-600' },
-        { label: 'Siswa Tidak Aktif', value: inactiveStudents.toString(), icon: UserX, iconBg: 'bg-rose-50 dark:bg-rose-900/30', iconColor: 'text-rose-600' },
-        { label: 'Siswa Baru', value: '-', icon: GraduationCap, iconBg: 'bg-amber-50 dark:bg-amber-900/30', iconColor: 'text-amber-600' },
+        { label: 'Siswa Aktif', value: activeStudents.toLocaleString(), icon: UserCheck, iconBg: 'bg-emerald-50 dark:bg-emerald-900/30', iconColor: 'text-emerald-600' },
+        { label: 'Siswa Tidak Aktif', value: inactiveStudents.toLocaleString(), icon: UserX, iconBg: 'bg-rose-50 dark:bg-rose-900/30', iconColor: 'text-rose-600' },
+        { label: 'Siswa Baru', value: newStudents.toLocaleString(), icon: GraduationCap, iconBg: 'bg-amber-50 dark:bg-amber-900/30', iconColor: 'text-amber-600' },
     ]
 
     const handleDeleteClick = (student: Student) => {

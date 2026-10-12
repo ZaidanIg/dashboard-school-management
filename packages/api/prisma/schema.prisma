@@ -1399,6 +1399,35 @@ model Announcement {
   @@map("announcements")
 }
 
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String?
+  role      UserRole?
+  classId   String?
+  title     String
+  message   String           @db.Text
+  type      NotificationType @default(INFO)
+  link      String?
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+  metadata  Json?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([role])
+  @@index([classId])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  ASSIGNMENT
+  SUBMISSION
+  ANNOUNCEMENT
+  INFO
+}
+
 model Letter {
   id            String       @id @default(cuid())
   letterNumber  String       @unique

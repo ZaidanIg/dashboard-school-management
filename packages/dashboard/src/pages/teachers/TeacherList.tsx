@@ -31,15 +31,16 @@ export default function TeacherList() {
     const { deleteTeacher, exportTeachers } = useTeacherMutations()
     const toast = useToast()
 
-    const totalTeachers = meta?.total || 0
-    const activeTeachers = teachers.filter(t => t.status === 'ACTIVE').length
-    const certifiedTeachers = teachers.filter(t => t.isCertified).length
+    const totalTeachers = meta?.stats?.total ?? meta?.total ?? teachers.length
+    const activeTeachers = meta?.stats?.active ?? teachers.filter(t => t.status === 'ACTIVE').length
+    const staffCount = meta?.stats?.staff ?? 0
+    const certifiedTeachers = meta?.stats?.certified ?? teachers.filter(t => t.isCertified).length
 
     const stats = [
-        { label: 'Total Guru', value: totalTeachers.toString(), icon: Users, iconBg: 'bg-blue-50 dark:bg-blue-900/30', iconColor: 'text-primary' },
-        { label: 'Guru Aktif', value: activeTeachers.toString(), icon: UserCheck, iconBg: 'bg-emerald-50 dark:bg-emerald-900/30', iconColor: 'text-emerald-600' },
-        { label: 'Staff', value: '-', icon: UserCog, iconBg: 'bg-purple-50 dark:bg-purple-900/30', iconColor: 'text-purple-600' },
-        { label: 'Bersertifikasi', value: certifiedTeachers.toString(), icon: Award, iconBg: 'bg-amber-50 dark:bg-amber-900/30', iconColor: 'text-amber-600' },
+        { label: 'Total Guru', value: totalTeachers.toLocaleString(), icon: Users, iconBg: 'bg-blue-50 dark:bg-blue-900/30', iconColor: 'text-primary' },
+        { label: 'Guru Aktif', value: activeTeachers.toLocaleString(), icon: UserCheck, iconBg: 'bg-emerald-50 dark:bg-emerald-900/30', iconColor: 'text-emerald-600' },
+        { label: 'Staff', value: staffCount.toLocaleString(), icon: UserCog, iconBg: 'bg-purple-50 dark:bg-purple-900/30', iconColor: 'text-purple-600' },
+        { label: 'Bersertifikasi', value: certifiedTeachers.toLocaleString(), icon: Award, iconBg: 'bg-amber-50 dark:bg-amber-900/30', iconColor: 'text-amber-600' },
     ]
 
     const columns: Column<Teacher>[] = [

@@ -138,5 +138,23 @@ export const teacherRoutes = [
             tags: ['api', 'teachers'],
             description: 'Record teacher attendance'
         }
+    },
+    {
+        method: 'GET',
+        path: '/api/teachers/performance',
+        handler: handlers.listTeacherPerformances,
+        options: {
+            tags: ['api', 'teachers'],
+            description: 'List teacher performance evaluations with statistics'
+        }
+    },
+    {
+        method: 'POST',
+        path: '/api/teachers/{teacherId}/performance',
+        handler: handlers.upsertTeacherPerformance,
+        options: {
+            tags: ['api', 'teachers'],
+            description: 'Create or update teacher performance evaluation'
+        }
     }
 ]

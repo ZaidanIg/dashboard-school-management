@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Search, Bell, ChevronDown, Menu, LogOut, User, Settings, Users, GraduationCap, X, Loader2, Globe, ExternalLink } from 'lucide-react'
+import { Search, ChevronDown, Menu, LogOut, User, Settings, Users, GraduationCap, X, Loader2, Globe, ExternalLink } from 'lucide-react'
 import { useAuthContext } from '@/contexts/AuthContext'
+import NotificationDropdown from '@/components/common/NotificationDropdown'
 
 interface HeaderProps {
     onMenuClick?: () => void
@@ -216,11 +217,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
             {/* Right Side */}
             <div className="flex items-center gap-3">
-                {/* Notifications */}
-                <button className="relative p-2 text-text-secondary hover:text-primary hover:bg-slate-50 dark:hover:bg-gray-700 rounded-full transition-colors">
-                    <Bell size={20} />
-                    <span className="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white dark:border-gray-800"></span>
-                </button>
 
                 {/* Academic Year Selector */}
                 <button className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-color dark:border-gray-600 hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors">
@@ -242,6 +238,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
                     <span>Landing Page</span>
                     <ExternalLink size={12} className="opacity-70" />
                 </Link>
+
+                {/* Notifications */}
+                <NotificationDropdown />
 
                 {/* User Menu */}
                 <div className="relative">

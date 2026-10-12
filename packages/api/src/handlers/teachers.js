@@ -18,7 +18,7 @@ export const listTeachers = async (request, h) => {
     if (position) where.position = position
     if (status) where.status = status
 
-    const [teachers, total] = await Promise.all([
+    const [teachers, total, activeCount, certifiedCount, staffCount] = await Promise.all([
         prisma.teacher.findMany({
             where,
             skip: (page - 1) * limit,
@@ -26,12 +26,26 @@ export const listTeachers = async (request, h) => {
             orderBy: { name: 'asc' },
             include: { subjects: { include: { subject: true } } }
         }),
-        prisma.teacher.count({ where })
+        prisma.teacher.count({ where }),
+        prisma.teacher.count({ where: { status: 'ACTIVE' } }),
+        prisma.teacher.count({ where: { isCertified: true } }),
+        prisma.user.count({ where: { role: 'STAFF' } })
     ])
 
     return {
         data: teachers,
-        meta: { page, limit, total, totalPages: Math.ceil(total / limit) }
+        meta: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            stats: {
+                total,
+                active: activeCount,
+                certified: certifiedCount,
+                staff: staffCount
+            }
+        }
     }
 }
 
@@ -436,4 +450,143 @@ export const createMyPermit = async (request, h) => {
         message: 'Permohonan izin berhasil diajukan',
         data: permit
     }).code(201)
+}
+
+/**
+ * List teacher performance evaluations with summary stats
+ */
+export const listTeacherPerformances = async (request, h) => {
+    const { academicYearId, semester, search } = request.query
+
+    let targetYearId = academicYearId
+    if (!targetYearId) {
+        const activeYear = await prisma.academicYear.findFirst({ where: { isActive: true } })
+        targetYearId = activeYear?.id
+    }
+
+    const where = {}
+    if (search) {
+        where.name = { contains: search, mode: 'insensitive' }
+    }
+
+    const teachers = await prisma.teacher.findMany({
+        where,
+        include: {
+            subjects: { include: { subject: true } },
+            performances: targetYearId ? {
+                where: {
+                    academicYearId: targetYearId,
+                    ...(semester ? { semester } : {})
+                },
+                take: 1
+            } : {
+                take: 1,
+                orderBy: { createdAt: 'desc' }
+            }
+        },
+        orderBy: { name: 'asc' }
+    })
+
+    const records = teachers.map(t => {
+        const perf = t.performances?.[0]
+        const attendance = perf?.attendanceScore ?? 90
+        const teaching = perf?.teachingScore ?? 85
+        const admin = perf?.professionalScore ?? 85
+        const social = perf?.socialScore ?? 85
+        const total = perf?.overallScore ?? Math.round((attendance * 0.3) + (teaching * 0.4) + (admin * 0.3))
+
+        let grade = 'B'
+        if (total >= 90) grade = 'A'
+        else if (total >= 80) grade = 'B'
+        else if (total >= 70) grade = 'C'
+        else grade = 'D'
+
+        return {
+            id: perf?.id || t.id,
+            teacherId: t.id,
+            name: t.name,
+            nip: t.nip,
+            subject: t.subjects?.[0]?.subject?.name || 'Umum',
+            attendance,
+            teaching,
+            admin,
+            social,
+            total,
+            grade,
+            notes: perf?.notes || null,
+            evaluatedBy: perf?.evaluatedBy || null,
+            hasRecord: !!perf
+        }
+    })
+
+    const totalEvals = records.length
+    const avgScore = totalEvals > 0 ? (records.reduce((acc, r) => acc + r.total, 0) / totalEvals).toFixed(1) : '0'
+    const gradeACount = records.filter(r => r.grade === 'A').length
+    const gradeBCount = records.filter(r => r.grade === 'B').length
+    const needGuidanceCount = records.filter(r => r.grade === 'C' || r.grade === 'D').length
+
+    return {
+        data: records,
+        stats: {
+            averageScore: avgScore,
+            gradeA: gradeACount,
+            gradeB: gradeBCount,
+            needGuidance: needGuidanceCount
+        }
+    }
+}
+
+/**
+ * Upsert teacher performance evaluation
+ */
+export const upsertTeacherPerformance = async (request, h) => {
+    const { teacherId } = request.params
+    const { academicYearId, semester = 'ODD', teachingScore, attendanceScore, professionalScore, socialScore, overallScore, notes, evaluatedBy } = request.payload
+
+    let targetYearId = academicYearId
+    if (!targetYearId) {
+        const activeYear = await prisma.academicYear.findFirst({ where: { isActive: true } })
+        targetYearId = activeYear?.id
+    }
+
+    if (!targetYearId) {
+        throw Boom.badRequest('Tahun akademik aktif tidak ditemukan')
+    }
+
+    const calculatedOverall = overallScore ?? Math.round(
+        ((attendanceScore ?? 90) * 0.3) + ((teachingScore ?? 85) * 0.4) + ((professionalScore ?? 85) * 0.3)
+    )
+
+    const record = await prisma.teacherPerformance.upsert({
+        where: {
+            teacherId_academicYearId_semester: {
+                teacherId,
+                academicYearId: targetYearId,
+                semester
+            }
+        },
+        create: {
+            teacherId,
+            academicYearId: targetYearId,
+            semester,
+            teachingScore: teachingScore ?? 85,
+            attendanceScore: attendanceScore ?? 90,
+            professionalScore: professionalScore ?? 85,
+            socialScore: socialScore ?? 85,
+            overallScore: calculatedOverall,
+            notes,
+            evaluatedBy: evaluatedBy || 'Admin'
+        },
+        update: {
+            teachingScore,
+            attendanceScore,
+            professionalScore,
+            socialScore,
+            overallScore: calculatedOverall,
+            notes,
+            evaluatedBy: evaluatedBy || 'Admin'
+        }
+    })
+
+    return h.response(record).code(200)
 }

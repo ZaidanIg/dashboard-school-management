@@ -31,13 +31,13 @@ export default function StudentAnnouncements() {
             <div className="space-y-4">
                 {loading ? (
                     <p className="text-center py-10">Memuat pengumuman...</p>
-                ) : announcements.length === 0 ? (
+                ) : !Array.isArray(announcements) || announcements.length === 0 ? (
                     <div className="text-center py-12 text-text-secondary">
                         <Megaphone className="h-12 w-12 mx-auto mb-4 opacity-50" />
                         <p>Belum ada pengumuman</p>
                     </div>
                 ) : (
-                    announcements.map((announcement) => (
+                    (Array.isArray(announcements) ? announcements : []).map((announcement) => (
                         <div
                             key={announcement.id}
                             className="bg-white dark:bg-gray-800 rounded-xl border border-border-color dark:border-gray-700 p-5 hover:bg-slate-50 dark:hover:bg-gray-700/30 transition-colors"

@@ -75,10 +75,14 @@ export default function Announcements() {
         }
 
         try {
-            await create(formData)
+            const res = await create(formData)
+            if (!res) {
+                addToast('error', 'Gagal membuat pengumuman')
+                return
+            }
             addToast('success', 'Pengumuman berhasil dibuat')
             setIsCreateOpen(false)
-            refetch()
+            await refetch()
         } catch {
             addToast('error', 'Gagal membuat pengumuman')
         }
@@ -89,10 +93,14 @@ export default function Announcements() {
         if (!editingItem) return
 
         try {
-            await update(editingItem.id, formData)
+            const res = await update(editingItem.id, formData)
+            if (!res) {
+                addToast('error', 'Gagal memperbarui pengumuman')
+                return
+            }
             addToast('success', 'Pengumuman berhasil diperbarui')
             setEditingItem(null)
-            refetch()
+            await refetch()
         } catch {
             addToast('error', 'Gagal memperbarui pengumuman')
         }
@@ -174,7 +182,7 @@ export default function Announcements() {
                 <div className="bg-red-50 text-red-600 p-4 rounded-lg">
                     {error}
                 </div>
-            ) : announcements.length === 0 ? (
+            ) : !Array.isArray(announcements) || announcements.length === 0 ? (
                 <div className="text-center py-12 text-text-secondary bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
                     <Megaphone className="h-12 w-12 mx-auto mb-4 opacity-50 text-gray-400" />
                     <p className="font-medium text-gray-700 dark:text-gray-300">Belum ada pengumuman</p>
@@ -182,7 +190,7 @@ export default function Announcements() {
                 </div>
             ) : (
                 <div className="space-y-4">
-                    {announcements.map((announcement) => (
+                    {(Array.isArray(announcements) ? announcements : []).map((announcement) => (
                         <div
                             key={announcement.id}
                             className="bg-white dark:bg-gray-800 rounded-xl border border-border-color dark:border-gray-700 p-5 shadow-sm hover:border-blue-200 transition-colors"

@@ -108,6 +108,27 @@ export const createAssignment = async (request, h) => {
     // Audit Log
     await logActivity(request, 'CREATE_ASSIGNMENT', 'Assignment', assignment.id, { title: assignment.title })
 
+    // In-App Notification for students in class
+    try {
+        await prisma.notification.create({
+            data: {
+                title: `Tugas Baru: ${assignment.title}`,
+                message: `Tugas baru untuk mata pelajaran ${assignment.subject?.name || 'Mata Pelajaran'}. Tenggat pengumpulan: ${assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Tidak ada tenggat'}.`,
+                type: 'ASSIGNMENT',
+                role: 'STUDENT',
+                classId: assignment.classId,
+                link: `/student-portal/assignments/${assignment.id}`,
+                metadata: {
+                    assignmentId: assignment.id,
+                    subjectName: assignment.subject?.name,
+                    dueDate: assignment.dueDate
+                }
+            }
+        })
+    } catch (notifErr) {
+        console.error('Failed to create student notification for assignment:', notifErr)
+    }
+
     // Notification Queue (Tugas Baru)
     if (assignment.class?.students?.length > 0) {
         // Collect parent numbers
@@ -206,6 +227,41 @@ export const submitAssignment = async (request, h) => {
 
     // Audit Log
     await logActivity(request, 'SUBMIT_ASSIGNMENT', 'AssignmentSubmission', submission.id, { assignmentId: id, late: isLate })
+
+    // In-App Notification for Teacher
+    try {
+        const [studentInfo, assignmentWithTeacher] = await Promise.all([
+            prisma.student.findUnique({ where: { id: validStudentId }, select: { name: true, nis: true } }),
+            prisma.assignment.findUnique({
+                where: { id },
+                include: { teacher: true, class: true }
+            })
+        ])
+
+        const studentName = studentInfo?.name || 'Siswa'
+        const className = assignmentWithTeacher?.class?.name ? ` (${assignmentWithTeacher.class.name})` : ''
+
+        await prisma.notification.create({
+            data: {
+                title: `Tugas Dikumpulkan: ${studentName}`,
+                message: `${studentName}${className} telah mengumpulkan tugas "${assignment.title}" ${isLate ? '(Terlambat)' : '(Tepat Waktu)'}.`,
+                type: 'SUBMISSION',
+                role: 'TEACHER',
+                userId: assignmentWithTeacher?.teacher?.userId || null,
+                classId: assignment.classId,
+                link: `/teacher-portal/assignments/${id}`,
+                metadata: {
+                    assignmentId: id,
+                    studentId: validStudentId,
+                    studentName,
+                    submissionId: submission.id,
+                    isLate
+                }
+            }
+        })
+    } catch (notifErr) {
+        console.error('Failed to create teacher notification for submission:', notifErr)
+    }
 
     return submission
 }

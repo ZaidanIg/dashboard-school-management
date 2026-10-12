@@ -13,10 +13,11 @@ export const communicationRoutes = [
             description: 'List announcements',
             validate: {
                 query: paginationQuery.keys({
-                    category: Joi.string().optional(),
-                    status: Joi.string().valid('DRAFT', 'PUBLISHED', 'ARCHIVED').optional(),
-                    search: Joi.string().optional(),
-                    target: Joi.string().valid('ALL', 'STUDENTS', 'TEACHERS', 'PARENTS').optional()
+                    category: Joi.string().allow('').optional(),
+                    type: Joi.string().allow('').optional(),
+                    status: Joi.string().allow('').optional(),
+                    search: Joi.string().allow('').optional(),
+                    target: Joi.string().allow('').optional()
                 })
             }
         }

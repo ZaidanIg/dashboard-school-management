@@ -7,6 +7,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner'
 import ErrorState from '@/components/common/ErrorState'
 import ConfirmationModal from '@/components/common/ConfirmationModal'
 import { useStudent, useStudentMutations } from '@/hooks/useStudents'
+import { api } from '@/lib/api'
 
 interface CredentialStatus {
     hasAccount: boolean
@@ -42,8 +43,7 @@ export default function StudentDetail() {
 
     const checkCredentials = async () => {
         try {
-            const res = await fetch(`http://localhost:3001/api/students/${id}/credentials`)
-            const data = await res.json()
+            const data = await api.get<CredentialStatus>(`/api/students/${id}/credentials`)
             setCredStatus(data)
         } catch (err) {
             console.error('Failed to check credentials', err)
@@ -56,18 +56,7 @@ export default function StudentDetail() {
         setGeneratedCreds(null)
 
         try {
-            const res = await fetch(`http://localhost:3001/api/students/${id}/credentials`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({})
-            })
-
-            if (!res.ok) {
-                const err = await res.json()
-                throw new Error(err.message || 'Failed to generate credentials')
-            }
-
-            const data = await res.json()
+            const data = await api.post<{ credentials: GeneratedCredentials }>(`/api/students/${id}/credentials`, {})
             setGeneratedCreds(data.credentials)
             checkCredentials()
         } catch (err: any) {

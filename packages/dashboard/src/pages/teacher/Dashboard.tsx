@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { useState, useEffect } from 'react'
+import NotificationFeed from '@/components/common/NotificationFeed'
 
 export default function TeacherDashboard() {
     const { user } = useAuthContext()
@@ -249,8 +250,15 @@ export default function TeacherDashboard() {
                     </div>
                 </div>
 
-                {/* Quick Actions / Notifications */}
+                {/* Live Notifications & Quick Actions */}
                 <div className="space-y-6">
+                    {/* Live Notifications Feed */}
+                    <NotificationFeed
+                        title="Notifikasi Tugas & Informasi"
+                        subtitle="Pengumpulan tugas siswa dari semua kelas & informasi operator"
+                        maxItems={5}
+                    />
+
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         <TrendingUp className="text-amber-500" size={24} />
                         Aktivitas Cepat

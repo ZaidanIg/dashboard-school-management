@@ -23,6 +23,7 @@ import { useCalendar } from '../../hooks/useCalendar'
 import { useAssignments } from '../../hooks/useLMS'
 import { useFetch } from '../../hooks/useShared'
 import { useAnnouncements } from '../../hooks/useCommunication'
+import NotificationFeed from '@/components/common/NotificationFeed'
 import { api } from '../../lib/api'
 import { useState, useEffect } from 'react'
 import type { Student } from '../../types'
@@ -315,7 +316,7 @@ export default function StudentDashboard() {
                                 <CalendarDays className="text-primary" size={24} />
                                 <h2 className="text-xl font-bold text-text-main dark:text-white">Jadwal Hari Ini</h2>
                             </div>
-                            <Link to="/student/schedule" className="text-sm font-medium text-primary hover:text-blue-700 flex items-center gap-1">
+                            <Link to="/student-portal/schedule" className="text-sm font-medium text-primary hover:text-blue-700 flex items-center gap-1">
                                 Lihat Semua <ChevronRight size={16} />
                             </Link>
                         </div>
@@ -379,7 +380,7 @@ export default function StudentDashboard() {
                                 ) : (
                                     <p className="text-sm text-text-secondary">Tidak ada tugas mendesak.</p>
                                 )}
-                                <Link to="/student/assignments" className="block text-center text-sm text-text-secondary hover:text-primary mt-2">
+                                <Link to="/student-portal/assignments" className="block text-center text-sm text-text-secondary hover:text-primary mt-2">
                                     {pendingAssignments.length > 3 ? `+ ${pendingAssignments.length - 3} tugas lainnya` : 'Lihat Semua'}
                                 </Link>
                             </div>
@@ -416,6 +417,12 @@ export default function StudentDashboard() {
                     </div>
                 </div>
 
+                {/* Live Notifications Feed */}
+                <NotificationFeed
+                    title="Notifikasi & Tugas Terbaru"
+                    subtitle="Pemberitahuan tugas yang di-assign oleh guru dan informasi operator"
+                />
+
                 {/* Information Panel - Student Announcements */}
                 <div className="bg-white dark:bg-gray-800 rounded-2xl border border-border-color dark:border-gray-700 p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-6">
@@ -428,7 +435,7 @@ export default function StudentDashboard() {
                                 <p className="text-sm text-text-secondary">Pengumuman dan informasi terbaru</p>
                             </div>
                         </div>
-                        <Link to="/student/announcements" className="text-sm font-medium text-primary hover:text-blue-700 flex items-center gap-1">
+                        <Link to="/student-portal/announcements" className="text-sm font-medium text-primary hover:text-blue-700 flex items-center gap-1">
                             Lihat Semua <ChevronRight size={16} />
                         </Link>
                     </div>

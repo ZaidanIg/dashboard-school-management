@@ -20,6 +20,7 @@ import { ppdbRoutes } from './ppdb-routes.js'
 import { curriculumAgnosticRoutes } from './curriculumAgnostic.js'
 import { publicRoutes } from './public.js'
 import { articleRoutes } from './article.js'
+import { notificationRoutes } from './notifications.js'
 
 
 /**
@@ -64,6 +65,7 @@ export const registerRoutes = (server) => {
     server.route(curriculumAgnosticRoutes)
     server.route(articleRoutes)
     server.route(publicRoutes)
+    server.route(notificationRoutes)
 
     console.log('✅ All routes registered')
 }

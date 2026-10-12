@@ -16,7 +16,7 @@ interface UseStudentsResult {
     students: Student[]
     loading: boolean
     error: string | null
-    meta: { page: number; limit: number; total: number; totalPages: number } | null
+    meta: { page: number; limit: number; total: number; totalPages: number; stats?: { total: number; active: number; inactive: number; newStudents: number } } | null
     refetch: () => void
 }
 

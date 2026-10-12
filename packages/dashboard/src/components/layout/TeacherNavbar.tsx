@@ -1,6 +1,7 @@
 
 import { Link, useLocation } from 'react-router-dom'
 import { useAuthContext } from '../../contexts/AuthContext'
+import NotificationDropdown from '@/components/common/NotificationDropdown'
 import {
     LayoutDashboard,
     CalendarCheck, // For Presensi/Schedule
@@ -34,8 +35,8 @@ export default function TeacherNavbar() {
 
     return (
         <>
-            {/* Desktop Navigation (Top Bar) */}
-            <nav className="hidden md:block fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-border-color dark:border-gray-800">
+            {/* Top Navigation Bar */}
+            <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-border-color dark:border-gray-800">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         {/* Logo */}
@@ -43,7 +44,7 @@ export default function TeacherNavbar() {
                             <div className="p-1.5 bg-primary/10 rounded-lg text-primary">
                                 <School size={24} />
                             </div>
-                            <span className="text-lg font-bold text-text-main dark:text-white hidden md:block">
+                            <span className="text-base sm:text-lg font-bold text-text-main dark:text-white">
                                 Teacher Portal
                             </span>
                         </Link>
@@ -65,51 +66,56 @@ export default function TeacherNavbar() {
                             ))}
                         </div>
 
-                        {/* User Profile */}
-                        <div className="relative">
-                            <button
-                                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                className="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
-                            >
-                                <div
-                                    className="size-8 rounded-full bg-cover bg-center bg-gray-200"
-                                    style={{
-                                        backgroundImage: user?.image
-                                            ? `url('${user.image}')`
-                                            : "url('https://ui-avatars.com/api/?name=" + (user?.name || 'Teacher') + "&background=random')",
-                                    }}
-                                />
-                            </button>
+                        {/* Actions: Notifications & Profile */}
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <NotificationDropdown />
 
-                            {/* Dropdown */}
-                            {isProfileOpen && (
-                                <>
+                            {/* User Profile */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                                    className="flex items-center gap-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
+                                >
                                     <div
-                                        className="fixed inset-0 z-40"
-                                        onClick={() => setIsProfileOpen(false)}
+                                        className="size-8 rounded-full bg-cover bg-center bg-gray-200"
+                                        style={{
+                                            backgroundImage: user?.image
+                                                ? `url('${user.image}')`
+                                                : "url('https://ui-avatars.com/api/?name=" + (user?.name || 'Teacher') + "&background=random')",
+                                        }}
                                     />
-                                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-border-color dark:border-gray-700 py-1 z-50 animate-in fade-in slide-in-from-top-2">
-                                        <div className="px-4 py-2 border-b border-border-color dark:border-gray-700">
-                                            <p className="text-sm font-bold text-text-main dark:text-white truncate">
-                                                {user?.name}
-                                            </p>
-                                            <p className="text-xs text-text-secondary dark:text-gray-400">
-                                                {user?.email}
-                                            </p>
+                                </button>
+
+                                {/* Dropdown */}
+                                {isProfileOpen && (
+                                    <>
+                                        <div
+                                            className="fixed inset-0 z-40"
+                                            onClick={() => setIsProfileOpen(false)}
+                                        />
+                                        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-border-color dark:border-gray-700 py-1 z-50 animate-in fade-in slide-in-from-top-2">
+                                            <div className="px-4 py-2 border-b border-border-color dark:border-gray-700">
+                                                <p className="text-sm font-bold text-text-main dark:text-white truncate">
+                                                    {user?.name}
+                                                </p>
+                                                <p className="text-xs text-text-secondary dark:text-gray-400">
+                                                    {user?.email}
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    logout()
+                                                    setIsProfileOpen(false)
+                                                }}
+                                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20"
+                                            >
+                                                <LogOut size={16} />
+                                                Keluar
+                                            </button>
                                         </div>
-                                        <button
-                                            onClick={() => {
-                                                logout()
-                                                setIsProfileOpen(false)
-                                            }}
-                                            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20"
-                                        >
-                                            <LogOut size={16} />
-                                            Keluar
-                                        </button>
-                                    </div>
-                                </>
-                            )}
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
